@@ -51,23 +51,30 @@ class Proctree:
 
     def get_psinfo(self):
         out = subprocess.check_output(['ps', '-e', '-o', 'pid,ppid,user,fname,args']).decode('utf8').rstrip("\n").split("\n")
+        head = out[0]
+        # guess columns width from ps header :
+        # '  PID  PPID USER     COMMAND  COMMAND'
+        ppidb = head.find('PID',0) + 4
+        userb = head.find('USER',0)
+        fnameb = head.find('COMMAND',0)
+        argsb = head.find('COMMAND', fnameb+1)
         for line in out:
             #(pid, ppid, user, fname, args) = line.split(maxsplit=4)
-            pid = line[0:5].lstrip(' ')
-            ppid = line[6:11].lstrip(' ')
-            user = line[12:20].rstrip(' ')
-            fname = line[21:29].rstrip(' ')
-            args = line[30:]
+            pid = line[0:ppidb-1].lstrip(' ')
+            ppid = line[ppidb:userb-1].lstrip(' ')
+            user = line[userb:fnameb-1].rstrip(' ')
+            fname = line[fnameb:argsb-1].rstrip(' ')
+            args = line[argsb:]
             #print(pid,ppid,user)
             if not (ppid in self.children):
                 self.children[ppid] = []
             self.children[ppid].append(pid)
             self.parent[pid] = ppid
             self.psinfo[pid] = {
-                'ppid'  : ppid,
-                'user'  : user,
-                'fname' : fname,
-                'args'  : args,
+                'ppid': ppid,
+                'user': user,
+                'fname': fname,
+                'args': args,
             }
 
     # parents[pid] = [ '1', '12', '130' ] (ordered parent pids)
@@ -128,10 +135,10 @@ class Proctree:
     def print_tree(self, child_only):
         self._print_tree(self.tree, not child_only)
 
-    def kill_with_children(self, sig=15, confirm=True):
+    def kill_with_children(self, sig=15, confirmed=False):
         self._print_tree(self.tree, False)
         print("kill "+" ".join(self.selected_pids))
-        if confirm:
+        if not confirmed:
             answer = input('Confirm ? (y/n) ')
             if answer != 'y':
                 return
