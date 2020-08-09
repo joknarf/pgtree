@@ -1,38 +1,59 @@
 # pgtree
 Unix process hierachy tree for specific processes (mixed pgrep + pstree)
 
-show all parents and children of processes matching `bash`
 ```
+# ./pgtree.py -h
+usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+
+-c : display processes and children only 
+-k : kill -TERM processes and children
+-K : kill -KILL processes and children
+
+by default display full process hierarchy (parents + children of selected processes)
+
+-p <pids> : select processes pids to display hierarchy
+<pgrep args> : use pgrep to select processes
+
+found pids are prefixed with ⇒  
+
+```
+
+show all parents and children of processes matching `bash`
+``` 
 # ./pgtree.py bash
- 1 (root) /init
- ├─6 (root) /init
- │ └─7 (root) /init
- │   └─8 (joknarf) -bash
- │     ├─200 (joknarf) sleep 600
- │     └─201 (joknarf) python ./pgtree.py bash
- │       └─203 (joknarf) ps -e -o pid,ppid,user,fname,args
- └─160 (root) /init
-   └─161 (root) /init
-     └─162 (joknarf) -bash
-       └─193 (joknarf) top
+  1 (root) [init] /init
+  ├─6 (root) [init] /init
+  │ └─7 (root) [init] /init
+⇒ │   └─8 (joknarf) [bash] -bash
+  │     └─2435 (joknarf) [python] python /mnt/c/Users/knarf/PycharmProjects/pgtree/pgtree.py bash
+  │       └─2437 (joknarf) [ps] ps -e -o pid,ppid,user,fname,args
+  └─1723 (root) [init] /init
+    └─1725 (root) [init] /init
+⇒     └─1729 (joknarf) [bash] -bash
+        └─1902 (root) [sudo] sudo su -
+          └─1903 (root) [su] su -
+⇒           └─1905 (root) [bash] -su
 ```
 
 show all children on processes matching `bash`
 ```
 # ./pgtree.py -c bash
- 8 (joknarf) -bash
- ├─200 (joknarf) sleep 600
- └─204 (joknarf) python ./pgtree.py -c bash
-   └─206 (joknarf) ps -e -o pid,ppid,user,fname,args
- 162 (joknarf) -bash
- └─193 (joknarf) top
- ```
+⇒ 8 (joknarf) [bash] -bash
+  └─2441 (joknarf) [python] python /mnt/c/Users/knarf/PycharmProjects/pgtree/pgtree.py -c bash
+    └─2443 (joknarf) [ps] ps -e -o pid,ppid,user,fname,args
+⇒ 1729 (joknarf) [bash] -bash
+  └─1902 (root) [sudo] sudo su -
+    └─1903 (root) [su] su -
+⇒     └─1905 (root) [bash] -su
+```
  
  kill all `sh`processes of user joknarf  and its children
  ```
- # ./pgtree -K -u joknarf -x sh
- 207 (joknarf) sh
- ├─208 (joknarf) sleep 900
- └─209 (joknarf) top
-kill 209 208 207
+# ./pgtree -K -u joknarf -x sh
+⇒ 2478 (joknarf) [sh] sh
+  ├─2480 (joknarf) [sleep] sleep 9999
+  └─2481 (joknarf) [top] top
+kill 2481 2480 2478
+Confirm ? (y/n) y
 ```
+
