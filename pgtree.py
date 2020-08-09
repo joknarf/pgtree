@@ -38,22 +38,27 @@ class Proctree:
     Display process tree of pids
     Proctree([ 'pid1', 'pid2' ])
     """
-    def __init__(self, pids=['1'], childonly=False):
-        self.pids = pids
-        self.psinfo = {}
-        self.parent = {}
-        self.children = {}
-        self.parents = {}
-        self.tree = {}
-        self.selected_pids = []
-        self.childonly = childonly
+    def __init__(self, pids=['1']):
+        self.pids = pids         # pids to display hierarchy
+        self.psinfo = {}         # ps command info stored
+        self.parent = {}         # parent of pid
+        self.children = {}       # children of pid
+        self.parents = {}        # all parents of pid in self.pids
+        self.tree = {}           # tree for self.pids
+        self.selected_pids = []  # pids and their children
         self.get_psinfo()
         self.build_tree()
 
     def get_psinfo(self):
         out = subprocess.check_output(['ps', '-e', '-o', 'pid,ppid,user,fname,args']).decode('utf8').rstrip("\n").split("\n")
         for line in out:
-            (pid, ppid, user, fname, args) = line.split(maxsplit=4)
+            #(pid, ppid, user, fname, args) = line.split(maxsplit=4)
+            pid = line[0:5].lstrip(' ')
+            ppid = line[6:11].lstrip(' ')
+            user = line[12:20].rstrip(' ')
+            fname = line[21:29].rstrip(' ')
+            args = line[30:]
+            #print(pid,ppid,user)
             if not (ppid in self.children):
                 self.children[ppid] = []
             self.children[ppid].append(pid)
@@ -97,57 +102,71 @@ class Proctree:
             if foundpid not in current:
                 self.children2tree(current, foundpid)
 
-    # recursive
-    def _print_tree(self, tree, pre="", print_it=True):
-        if (tree == None or len(tree) == 0):
-            return
+    # recursive process tree display
+    def _print_tree(self, tree, print_it=True, pre=' '):
         n = 1
         for pid, info in tree.items():
-            next_p = ""
+            next_p = ''
+            ppre = pre
             if pid in self.pids:
                 print_it = True
+                ppre = '⇒' + pre[1:]  # ⇒ 🠖
             if print_it:
                 self.selected_pids.insert(0, pid)
-                if n == len(tree):
-                    curr_p = "└─"
-                    next_p = "  "
+                if pre == ' ':
+                    curr_p = next_p = ' '
+                elif n == len(tree):
+                    curr_p = '└─'
+                    next_p = '  '
                 else:
-                    curr_p = "├─"
-                    next_p = "│ "
-                if pre == "":
-                    curr_p = " "
-                    next_p = " "
-                print(pre + curr_p + pid, '('+info['user']+')', info['args'])
-            self._print_tree(info['children'], pre + next_p, print_it)
+                    curr_p = '├─'
+                    next_p = '│ '
+                print(ppre+curr_p+pid, '('+info['user']+')', '['+info['fname']+']', info['args'])
+            self._print_tree(info['children'], print_it, pre+next_p)
             n += 1
 
     def print_tree(self, child_only):
-        self._print_tree(self.tree, '', not child_only)
+        self._print_tree(self.tree, not child_only)
 
-    def kill_with_children(self, sig=15):
-        self._print_tree(self.tree, '', False)
-        print( "kill "+" ".join(self.selected_pids))
+    def kill_with_children(self, sig=15, confirm=True):
+        self._print_tree(self.tree, False)
+        print("kill "+" ".join(self.selected_pids))
+        if confirm:
+            answer = input('Confirm ? (y/n) ')
+            if answer != 'y':
+                return
         for pid in self.selected_pids:
+            if pid == str(os.getpid()):
+                continue
             try:
                 os.kill(int(pid), sig)
             except ProcessLookupError:
                 continue
+            except PermissionError:
+                print('kill ' + pid + ': Permission error')
+                continue
+
 
 def main():
+    # We don't want to use argparse module as we are not in a fancy developer zone
+    # We are sys admins we are facing very hazardous environments (python 2.4 or less)
     if len(sys.argv) < 2 or sys.argv[1] == '-h':
-        print("usage: pgtree.py <pgrep args>")
+        print("usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]")
         exit(1)
     sig = 0
+    child_only = False
+    found = []
+    # switch case in python useless...
     if sys.argv[1] == '-k':
         sig = 15
         sys.argv.pop(1)
-    if sys.argv[1] == '-K':
+    elif sys.argv[1] == '-K':
         sig = 9
         sys.argv.pop(1)
-    child_only = False
-    if sys.argv[1] == '-c':
+    elif sys.argv[1] == '-c':
         child_only = True
         sys.argv.pop(1)
+
     if sys.argv[1] == '-p':
         found = sys.argv[2].split(',')
     else:
