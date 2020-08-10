@@ -7,7 +7,7 @@ The code must be compatible with python 2 + 3
 Should work on any Unix that can execute :
 ```
 # /usr/bin/pgrep 
-# /usr/bin/ps -e -o pid,ppid,fname,args
+# /usr/bin/ps -e -o pid,ppid,user,fname,args
 ```
 
 ## Usage
