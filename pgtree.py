@@ -1,8 +1,15 @@
 #!/usr/bin/env python
+# coding: utf-8
 """
 Program for showing the hierarchy of specific processes on a Unix computer.
 Like pstree but with searching for specific processes with pgrep first and display
 hierarchy of matching processes (parents and children)
+should work on any Unix supporting commands :
+# pgrep
+# ps -e -o pid,ppid,fname,args
+(RedHat/CentOS/Fedora/Ubuntu/Suse/Solaris...)
+Compatible python 2 / 3
+
 Usage :
 $ pgtree.py <pgrep args>
 Example:
@@ -10,9 +17,9 @@ $ pgtree.py sshd
   1 (root) /init
   └─6 (root) /init
     └─144 (root) /lib/systemd/systemd --system-unit=basic.target
-      └─483 (root) /usr/sbin/sshd -D
-        └─1066 (root) sshd: joknarf [priv]
-          └─1181 (joknarf) sshd: joknarf@pts/1
+⇒     └─483 (root) /usr/sbin/sshd -D
+⇒       └─1066 (root) sshd: joknarf [priv]
+⇒         └─1181 (joknarf) sshd: joknarf@pts/1
             └─1182 (joknarf) -bash
               ├─1905 (joknarf) sleep 60
               └─1906 (joknarf) top
@@ -26,16 +33,25 @@ import sys
 import os
 import subprocess
 
+if sys.version_info < (3, 0):
+    reload(sys)
+    sys.setdefaultencoding('utf8')
 
 def runcmd(cmd):
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out.decode('utf8').rstrip('\n'), std_err
 
+def input(prompt):
+    if sys.version_info < (3, 0):
+        return raw_input(prompt)
+    else:
+        return input(prompt)
+
 
 class Proctree:
     """
-    Display process tree of pids
+    Manage process tree of pids
     Proctree([ 'pid1', 'pid2' ])
     """
     def __init__(self, pids=['1']):
@@ -50,21 +66,22 @@ class Proctree:
         self.build_tree()
 
     def get_psinfo(self):
-        out = subprocess.check_output(['ps', '-e', '-o', 'pid,ppid,user,fname,args']).decode('utf8').rstrip("\n").split("\n")
-        head = out[0]
+        ps_out = subprocess.check_output(['ps', '-e', '-o', 'pid,ppid,user,fname,args']).decode('utf8').rstrip("\n").split("\n")
+        ps_header = ps_out[0]
         # guess columns width from ps header :
+        # PID and PPID right aligned
         # '  PID  PPID USER     COMMAND  COMMAND'
-        ppidb = head.find('PID',0) + 4
-        userb = head.find('USER',0)
-        fnameb = head.find('COMMAND',0)
-        argsb = head.find('COMMAND', fnameb+1)
-        for line in out:
+        b_ppid = ps_header.find('PID') + 4
+        b_user = ps_header.find('USER')
+        b_fname = ps_header.find('COMMAND')
+        b_args = ps_header.find('COMMAND', b_fname+1)
+        for line in ps_out:
             #(pid, ppid, user, fname, args) = line.split(maxsplit=4)
-            pid = line[0:ppidb-1].lstrip(' ')
-            ppid = line[ppidb:userb-1].lstrip(' ')
-            user = line[userb:fnameb-1].rstrip(' ')
-            fname = line[fnameb:argsb-1].rstrip(' ')
-            args = line[argsb:]
+            pid = line[0:b_ppid-1].lstrip(' ')
+            ppid = line[b_ppid:b_user-1].lstrip(' ')
+            user = line[b_user:b_fname-1].rstrip(' ')
+            fname = line[b_fname:b_args-1].rstrip(' ')
+            args = line[b_args:]
             #print(pid,ppid,user)
             if not (ppid in self.children):
                 self.children[ppid] = []
@@ -117,7 +134,7 @@ class Proctree:
             ppre = pre
             if pid in self.pids:
                 print_it = True
-                ppre = '⇒' + pre[1:]  # ⇒ 🠖
+                ppre = '▶' + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
             if print_it:
                 self.selected_pids.insert(0, pid)
                 if pre == ' ':
@@ -128,7 +145,9 @@ class Proctree:
                 else:
                     curr_p = '├─'
                     next_p = '│ '
-                print(ppre+curr_p+pid, '('+info['user']+')', '['+info['fname']+']', info['args'])
+                psinfo = pid+' ('+info['user']+') ['+info['fname']+'] '+info['args']
+                output = ppre + curr_p + psinfo
+                print(output)
             self._print_tree(info['children'], print_it, pre+next_p)
             n += 1
 
@@ -185,11 +204,17 @@ def main():
     pid = str(os.getpid())
     if pid in found:
         found.remove(pid)
+    rmam="\x1b[?7l"
+    smam="\x1b[?7h"
+    if sys.stdout.isatty():
+        sys.stdout.write(rmam)
     ptree = Proctree(found)
     if sig:
         ptree.kill_with_children(sig)
     else:
         ptree.print_tree(child_only)
+    if sys.stdout.isatty():
+       sys.stdout.write(smam)
 
 
 if __name__ == '__main__':
