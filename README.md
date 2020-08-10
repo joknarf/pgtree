@@ -1,6 +1,15 @@
 # pgtree
-Unix process hierachy tree for specific processes (mixed pgrep + pstree)
+Unix process hierachy tree for specific processes (kind of mixed pgrep + pstree)
 
+The purpose is to have the tool working out of the box on any Unix box, using the default OS python installed, without installing anything else.
+The code must be compatible with python 2 + 3
+Should work on any Unix that can execute :
+```
+# /usr/bin/pgrep 
+# /usr/bin/ps -e -o pid,ppid,fname,args
+```
+
+## Usage
 ```
 # ./pgtree.py -h
 usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
@@ -18,6 +27,7 @@ found pids are prefixed with ▶
 
 ```
 
+## Examples
 show all parents and children of processes matching `bash`
 ``` 
 # ./pgtree.py bash
@@ -35,7 +45,7 @@ show all parents and children of processes matching `bash`
 ▶           └─1905 (root) [bash] -su
 ```
 
-show all children on processes matching `bash`
+show processes matching `bash` and their children
 ```
 # ./pgtree.py -c bash
 ▶ 8 (joknarf) [bash] -bash
@@ -49,11 +59,10 @@ show all children on processes matching `bash`
  
  kill all `sh`processes of user joknarf  and its children
  ```
-# ./pgtree -K -u joknarf -x sh
+# ./pgtree.py -K -u joknarf -x sh
 ▶ 2478 (joknarf) [sh] sh
   ├─2480 (joknarf) [sleep] sleep 9999
   └─2481 (joknarf) [top] top
 kill 2481 2480 2478
-Confirm ? (y/n) y
+Confirm (y/[n]) ? y
 ```
-
