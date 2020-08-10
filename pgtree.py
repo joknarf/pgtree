@@ -176,8 +176,22 @@ class Proctree:
 def main():
     # We don't want to use argparse module as we are not in a fancy developer zone
     # We are sys admins we are facing very hazardous environments (python 2.4 or less)
+    usage = """
+    usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+
+    -c : display processes and children only 
+    -k : kill -TERM processes and children
+    -K : kill -KILL processes and children
+
+    by default display full process hierarchy (parents + children of selected processes)
+
+    -p <pids> : select processes pids to display hierarchy
+    <pgrep args> : use pgrep to select processes
+
+    found pids are prefixed with ▶
+    """
     if len(sys.argv) < 2 or sys.argv[1] == '-h':
-        print("usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]")
+        print(usage)
         exit(1)
     sig = 0
     child_only = False
