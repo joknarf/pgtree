@@ -14,15 +14,15 @@ Usage :
 $ pgtree.py <pgrep args>
 Example:
 $ pgtree.py sshd
-  1 (root) /init
-  └─6 (root) /init
-    └─144 (root) /lib/systemd/systemd --system-unit=basic.target
-⇒     └─483 (root) /usr/sbin/sshd -D
-⇒       └─1066 (root) sshd: joknarf [priv]
-⇒         └─1181 (joknarf) sshd: joknarf@pts/1
-            └─1182 (joknarf) -bash
-              ├─1905 (joknarf) sleep 60
-              └─1906 (joknarf) top
+  1 (root) [init] /init
+  └─6 (root) [init] /init
+    └─144 (root) [systemd] /lib/systemd/systemd --system-unit=basic.target
+▶     └─483 (root) [sshd] /usr/sbin/sshd -D
+▶       └─1066 (root) [sshd] sshd: joknarf [priv]
+▶         └─1181 (joknarf) [sshd] sshd: joknarf@pts/1
+            └─1182 (joknarf) [bash] -bash
+              ├─1905 (joknarf) [sleep] sleep 60
+              └─1906 (joknarf) [top] top
 """
 
 __author__ = "Franck Jouvanceau"
@@ -43,10 +43,11 @@ def runcmd(cmd):
     return proc.returncode, std_out.decode('utf8').rstrip('\n'), std_err
 
 def ask(prompt):
-    if sys.version_info < (3, 0):
-        return raw_input(prompt)
-    else:
-        return input(prompt)
+    try:
+        answer = raw_input(prompt)
+    except NameError:
+        answer = input(prompt)
+    return answer
 
 
 class Proctree:
@@ -134,15 +135,15 @@ class Proctree:
             ppre = pre
             if pid in self.pids:
                 print_it = True
-                ppre = '▶' + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
+                ppre = '▶' + pre[1:]   # ⇒ 🠖 🡆 ➤ ➥ ► ▶
             if print_it:
                 self.selected_pids.insert(0, pid)
-                if pre == ' ':
+                if pre == ' ':         # head of hierarchy
                     curr_p = next_p = ' '
-                elif n == len(tree):
+                elif n == len(tree):   # last child
                     curr_p = '└─'
                     next_p = '  '
-                else:
+                else:                  # not last child
                     curr_p = '├─'
                     next_p = '│ '
                 psinfo = pid+' ('+info['user']+') ['+info['fname']+'] '+info['args']
@@ -156,9 +157,11 @@ class Proctree:
 
     def kill_with_children(self, sig=15, confirmed=False):
         self._print_tree(self.tree, False)
+        if len(self.selected_pids) == 0:
+            return
         print("kill "+" ".join(self.selected_pids))
         if not confirmed:
-            answer = ask('Confirm ? (y/n) ')
+            answer = ask('Confirm (y/[n]) ? ')
             if answer != 'y':
                 return
         for pid in self.selected_pids:
