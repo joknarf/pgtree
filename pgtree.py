@@ -42,7 +42,7 @@ def runcmd(cmd):
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out.decode('utf8').rstrip('\n'), std_err
 
-def input(prompt):
+def ask(prompt):
     if sys.version_info < (3, 0):
         return raw_input(prompt)
     else:
@@ -158,7 +158,7 @@ class Proctree:
         self._print_tree(self.tree, False)
         print("kill "+" ".join(self.selected_pids))
         if not confirmed:
-            answer = input('Confirm ? (y/n) ')
+            answer = ask('Confirm ? (y/n) ')
             if answer != 'y':
                 return
         for pid in self.selected_pids:
