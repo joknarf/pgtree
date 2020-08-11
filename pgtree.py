@@ -182,10 +182,10 @@ def main():
     # We don't want to use argparse module as we are not in a fancy developer zone
     # We are sys admins we are facing very hazardous environments (python 2.4 or less)
     usage = """
-    usage: pgtree.py [-U] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
-    (user names resolution may be unusable : ldap/idm...)
+         (if uid/user mapping is broken ps command can be stuck)
 
     -c : display processes and children only 
     -k : kill -TERM processes and children

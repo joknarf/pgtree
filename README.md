@@ -7,24 +7,27 @@ The code must be compatible with python 2 + 3
 Should work on any Unix that can execute :
 ```
 # /usr/bin/pgrep 
-# /usr/bin/ps -e -o pid,ppid,user,fname,args
+# /usr/bin/ps -e -o pid,ppid,user,comm,args
 ```
 
 ## Usage
 ```
 # ./pgtree.py -h
-usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
--c : display processes and children only 
--k : kill -TERM processes and children
--K : kill -KILL processes and children
+    -I : use -o uid instead of -o user for ps command
+         (if uid/user mapping is broken ps command can be stuck)
 
-by default display full process hierarchy (parents + children of selected processes)
+    -c : display processes and children only 
+    -k : kill -TERM processes and children
+    -K : kill -KILL processes and children
 
--p <pids> : select processes pids to display hierarchy
-<pgrep args> : use pgrep to select processes
+    by default display full process hierarchy (parents + children of selected processes)
 
-found pids are prefixed with ▶  
+    -p <pids> : select processes pids to display hierarchy
+    <pgrep args> : use pgrep to select processes
+
+    found pids are prefixed with ▶  
 
 ```
 
