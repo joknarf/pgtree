@@ -13,11 +13,10 @@ Should work on any Unix that can execute :
 ## Usage
 ```
 # ./pgtree.py -h
-    usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
-
     -c : display processes and children only 
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
@@ -25,10 +24,9 @@ Should work on any Unix that can execute :
     by default display full process hierarchy (parents + children of selected processes)
 
     -p <pids> : select processes pids to display hierarchy
-    <pgrep args> : use pgrep to select processes
+    <pgrep args> : use pgrep to select processes (see pgrep -h)
 
-    found pids are prefixed with ▶  
-
+    found pids are prefixed with ▶
 ```
 
 ## Examples
