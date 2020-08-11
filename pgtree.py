@@ -10,10 +10,8 @@ should work on any Unix supporting commands :
 (RedHat/CentOS/Fedora/Ubuntu/Suse/Solaris...)
 Compatible python 2 / 3
 
-Usage :
-$ pgtree.py <pgrep args>
 Example:
-$ pgtree.py sshd
+$ ./pgtree.py sshd
   1 (root) [init] /init
   └─6 (root) [init] /init
     └─144 (root) [systemd] /lib/systemd/systemd --system-unit=basic.target
@@ -56,7 +54,7 @@ class Proctree:
     Manage process tree of pids
     Proctree([ 'pid1', 'pid2' ])
     """
-    def __init__(self, pids=['1'], use_uid=False):
+    def __init__(self, pids=['1'], use_uid=False, color=False):
         self.pids = pids         # pids to display hierarchy
         self.psinfo = {}         # ps command info stored
         self.parent = {}         # parent of pid
@@ -66,12 +64,22 @@ class Proctree:
         self.selected_pids = []  # pids and their children
         self.get_psinfo(use_uid)
         self.build_tree()
+        self.colors = {}
+        if color:
+            self.col_fg = "\x1b[38;5;"
+            self.col_reset = "\x1b[0m"
+            self.colors = {
+                'pid': '12',
+                'user': '3',
+                'comm': '2',
+            }
 
     def get_psinfo(self, use_uid):
         user = 'uid' if use_uid else 'user'
         (code, out, err) = runcmd(['ps', '-e', '-o', 'pid,ppid,'+user+',comm,args'])
         ps_out = out.split('\n')
         ps_header = ps_out[0]
+        # cannot split as space char can occur in comm
         # guess columns width from ps header :
         # PID and PPID right aligned (and UID if used)
         # '  PID  PPID USER     COMMAND  COMMAND'
@@ -80,13 +88,11 @@ class Proctree:
         b_comm = ps_header.find('COMMAND')
         b_args = ps_header.find('COMMAND', b_comm+1)
         for line in ps_out:
-            #(pid, ppid, user, comm, args) = line.split(maxsplit=4)
             pid = line[0:b_ppid-1].strip(' ')
             ppid = line[b_ppid:b_user-1].strip(' ')
             user = line[b_user:b_comm-1].strip(' ')
             comm = line[b_comm:b_args-1].strip(' ')
             args = line[b_args:]
-            #print(pid,ppid,user)
             if not (ppid in self.children):
                 self.children[ppid] = []
             self.children[ppid].append(pid)
@@ -130,6 +136,12 @@ class Proctree:
             if foundpid not in current:
                 self.children2tree(current, foundpid)
 
+    def colorize(self, field, value):
+        if field in self.colors:
+            return self.col_fg + self.colors[field] + "m" + value + self.col_reset
+        else:
+            return value
+
     # recursive process tree display
     def _print_tree(self, tree, print_it=True, pre=' '):
         n = 1
@@ -149,7 +161,10 @@ class Proctree:
                 else:                  # not last child
                     curr_p = '├─'
                     next_p = '│ '
-                psinfo = pid+' ('+info['user']+') ['+info['comm']+'] '+info['args']
+                psinfo = self.colorize('pid', pid) +\
+                         self.colorize('user', ' ('+info['user']+') ') +\
+                         self.colorize('comm', '['+info['comm']+'] ') +\
+                         info['args']
                 output = ppre + curr_p + psinfo
                 print(output)
             self._print_tree(info['children'], print_it, pre+next_p)
@@ -188,40 +203,44 @@ def main():
     -c : display processes and children only 
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
+    -C : no color (default colored output on tty)
 
     by default display full process hierarchy (parents + children of selected processes)
 
-    -p <pids> : select processes pids to display hierarchy
+    -p <pids> : select processes pids to display hierarchy (default 1)
     <pgrep args> : use pgrep to select processes (see pgrep -h)
 
     found pids are prefixed with ▶
     """
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "IckKfxvinop:u:U:g:G:P:s:t:F:", ["ns=","nslist="] )
+        opts, args = getopt.getopt(sys.argv[1:], "ICckKfxvinop:u:U:g:G:P:s:t:F:", ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
 
     use_uid = False
+    color = True
     child_only = False
     sig = 0
     pgrep_args = []
-    found = [ '1' ]
+    found = ['1']
     for o, a in opts:
         if o == "-I":
             use_uid = True
-        elif o in ("-c"):
+        elif o == "-C":
+            color = False
+        elif o == "-c":
             child_only = True
-        elif o in ("-k"):
+        elif o == "-k":
             sig = 15
-        elif o in ("-K"):
+        elif o == "-K":
             sig = 9
-        elif o in ("-p"):
+        elif o == "-p":
             found = a.split(',')
-        elif o in ("-f","-x","-v","-i","-n","-o"):
+        elif o in ("-f", "-x", "-v", "-i", "-n", "-o"):
             pgrep_args.append(o)
-        elif o in ("-u","-U","-g","-G","-P","-s","-t","-F","--ns","--nslist"):
-            pgrep_args += [ o, a ]
+        elif o in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
+            pgrep_args += [o, a]
     pgrep_args += args
     if pgrep_args:
         code, pgrep, err = runcmd(['/usr/bin/pgrep'] + pgrep_args)
@@ -231,10 +250,12 @@ def main():
         found.remove(pid)
     rmam="\x1b[?7l"
     smam="\x1b[?7h"
-    ptree = Proctree(pids=found, use_uid=use_uid)
     # truncate lines if tty output
     if sys.stdout.isatty():
         sys.stdout.write(rmam)
+    else:
+        color = False
+    ptree = Proctree(pids=found, use_uid=use_uid, color=color)
     if sig:
         ptree.kill_with_children(sig)
     else:
