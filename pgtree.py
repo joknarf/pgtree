@@ -31,6 +31,7 @@ __license__ = "MIT"
 
 import sys
 import os
+import getopt
 import subprocess
 
 if sys.version_info < (3, 0):
@@ -179,14 +180,11 @@ class Proctree:
 
 
 def main():
-    # We don't want to use argparse module as we are not in a fancy developer zone
-    # We are sys admins we are facing very hazardous environments (python 2.4 or less)
     usage = """
     usage: pgtree.py [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
-
     -c : display processes and children only 
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
@@ -194,35 +192,39 @@ def main():
     by default display full process hierarchy (parents + children of selected processes)
 
     -p <pids> : select processes pids to display hierarchy
-    <pgrep args> : use pgrep to select processes
+    <pgrep args> : use pgrep to select processes (see pgrep -h)
 
     found pids are prefixed with ▶
     """
-    if len(sys.argv) < 2 or sys.argv[1] == '-h':
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "IckKfxvinop:u:U:g:G:P:s:t:F:", ["ns=","nslist="] )
+    except getopt.GetoptError:
         print(usage)
-        exit(1)
-    sig = 0
-    child_only = False
-    found = []
+        sys.exit(2)
+
     use_uid = False
-    if sys.argv[1] == '-I':
-        use_uid = True
-        sys.argv.pop(1)
-
-    if sys.argv[1] == '-k':
-        sig = 15
-        sys.argv.pop(1)
-    elif sys.argv[1] == '-K':
-        sig = 9
-        sys.argv.pop(1)
-    elif sys.argv[1] == '-c':
-        child_only = True
-        sys.argv.pop(1)
-
-    if sys.argv[1] == '-p':
-        found = sys.argv[2].split(',')
-    else:
-        code, pgrep, err = runcmd(['/usr/bin/pgrep'] + sys.argv[1:])
+    child_only = False
+    sig = 0
+    pgrep_args = []
+    found = []
+    for o, a in opts:
+        if o == "-I":
+            use_uid = True
+        elif o in ("-c"):
+            child_only = True
+        elif o in ("-k"):
+            sig = 15
+        elif o in ("-K"):
+            sig = 9
+        elif o in ("-p"):
+            found = a.split(',')
+        elif o in ("-f","-x","-v","-i","-n","-o"):
+            pgrep_args.append(o)
+        elif o in ("-u","-U","-g","-G","-P","-s","-t","-F","--ns","--nslist"):
+            pgrep_args += [ o, a ]
+    pgrep_args += args
+    if not found:
+        code, pgrep, err = runcmd(['/usr/bin/pgrep'] + pgrep_args)
         if pgrep:
             found = pgrep.split("\n")
         else:
@@ -233,6 +235,7 @@ def main():
     rmam="\x1b[?7l"
     smam="\x1b[?7h"
     ptree = Proctree(pids=found, use_uid=use_uid)
+    # truncate lines if tty output
     if sys.stdout.isatty():
         sys.stdout.write(rmam)
     if sig:
