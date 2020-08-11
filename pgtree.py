@@ -6,7 +6,7 @@ Like pstree but with searching for specific processes with pgrep first and displ
 hierarchy of matching processes (parents and children)
 should work on any Unix supporting commands :
 # pgrep
-# ps -e -o pid,ppid,fname,args
+# ps -e -o pid,ppid,comm,args
 (RedHat/CentOS/Fedora/Ubuntu/Suse/Solaris...)
 Compatible python 2 / 3
 
@@ -67,21 +67,21 @@ class Proctree:
         self.build_tree()
 
     def get_psinfo(self):
-        ps_out = subprocess.check_output(['ps', '-e', '-o', 'pid,ppid,user,fname,args']).decode('utf8').rstrip("\n").split("\n")
+        ps_out = subprocess.check_output(['ps', '-e', '-o', 'pid,ppid,user,comm,args']).decode('utf8').rstrip("\n").split("\n")
         ps_header = ps_out[0]
         # guess columns width from ps header :
         # PID and PPID right aligned
         # '  PID  PPID USER     COMMAND  COMMAND'
         b_ppid = ps_header.find('PID') + 4
         b_user = ps_header.find('USER')
-        b_fname = ps_header.find('COMMAND')
-        b_args = ps_header.find('COMMAND', b_fname+1)
+        b_comm = ps_header.find('COMMAND')
+        b_args = ps_header.find('COMMAND', b_comm+1)
         for line in ps_out:
-            #(pid, ppid, user, fname, args) = line.split(maxsplit=4)
+            #(pid, ppid, user, comm, args) = line.split(maxsplit=4)
             pid = line[0:b_ppid-1].lstrip(' ')
             ppid = line[b_ppid:b_user-1].lstrip(' ')
-            user = line[b_user:b_fname-1].rstrip(' ')
-            fname = line[b_fname:b_args-1].rstrip(' ')
+            user = line[b_user:b_comm-1].rstrip(' ')
+            comm = line[b_comm:b_args-1].rstrip(' ')
             args = line[b_args:]
             #print(pid,ppid,user)
             if not (ppid in self.children):
@@ -91,7 +91,7 @@ class Proctree:
             self.psinfo[pid] = {
                 'ppid': ppid,
                 'user': user,
-                'fname': fname,
+                'comm': comm,
                 'args': args,
             }
 
@@ -146,7 +146,7 @@ class Proctree:
                 else:                  # not last child
                     curr_p = '├─'
                     next_p = '│ '
-                psinfo = pid+' ('+info['user']+') ['+info['fname']+'] '+info['args']
+                psinfo = pid+' ('+info['user']+') ['+info['comm']+'] '+info['args']
                 output = ppre + curr_p + psinfo
                 print(output)
             self._print_tree(info['children'], print_it, pre+next_p)

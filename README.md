@@ -37,7 +37,7 @@ show all parents and children of processes matching `bash`
   │ └─7 (root) [init] /init
 ▶ │   └─8 (joknarf) [bash] -bash
   │     └─2435 (joknarf) [python] python /mnt/c/Users/knarf/PycharmProjects/pgtree/pgtree.py bash
-  │       └─2437 (joknarf) [ps] ps -e -o pid,ppid,user,fname,args
+  │       └─2437 (joknarf) [ps] ps -e -o pid,ppid,user,comm,args
   └─1723 (root) [init] /init
     └─1725 (root) [init] /init
 ▶     └─1729 (joknarf) [bash] -bash
@@ -51,7 +51,7 @@ show processes matching `bash` and their children
 # ./pgtree.py -c bash
 ▶ 8 (joknarf) [bash] -bash
   └─2441 (joknarf) [python] python /mnt/c/Users/knarf/PycharmProjects/pgtree/pgtree.py -c bash
-    └─2443 (joknarf) [ps] ps -e -o pid,ppid,user,fname,args
+    └─2443 (joknarf) [ps] ps -e -o pid,ppid,user,comm,args
 ▶ 1729 (joknarf) [bash] -bash
   └─1902 (root) [sudo] sudo su -
     └─1903 (root) [su] su -
