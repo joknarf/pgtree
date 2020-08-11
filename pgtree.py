@@ -206,7 +206,7 @@ def main():
     child_only = False
     sig = 0
     pgrep_args = []
-    found = []
+    found = [ '1' ]
     for o, a in opts:
         if o == "-I":
             use_uid = True
@@ -223,12 +223,9 @@ def main():
         elif o in ("-u","-U","-g","-G","-P","-s","-t","-F","--ns","--nslist"):
             pgrep_args += [ o, a ]
     pgrep_args += args
-    if not found:
+    if pgrep_args:
         code, pgrep, err = runcmd(['/usr/bin/pgrep'] + pgrep_args)
-        if pgrep:
-            found = pgrep.split("\n")
-        else:
-            exit(1)
+        found = pgrep.split("\n")
     pid = str(os.getpid())
     if pid in found:
         found.remove(pid)
