@@ -55,7 +55,7 @@ class Proctree:
     Manage process tree of pids
     Proctree([ 'pid1', 'pid2' ])
     """
-    def __init__(self, pids=['1']):
+    def __init__(self, pids=['1'], use_uid=False):
         self.pids = pids         # pids to display hierarchy
         self.psinfo = {}         # ps command info stored
         self.parent = {}         # parent of pid
@@ -63,25 +63,27 @@ class Proctree:
         self.parents = {}        # all parents of pid in self.pids
         self.tree = {}           # tree for self.pids
         self.selected_pids = []  # pids and their children
-        self.get_psinfo()
+        self.get_psinfo(use_uid)
         self.build_tree()
 
-    def get_psinfo(self):
-        ps_out = subprocess.check_output(['ps', '-e', '-o', 'pid,ppid,user,comm,args']).decode('utf8').rstrip("\n").split("\n")
+    def get_psinfo(self, use_uid):
+        user = 'uid' if use_uid else 'user'
+        (code, out, err) = runcmd(['ps', '-e', '-o', 'pid,ppid,'+user+',comm,args'])
+        ps_out = out.split('\n')
         ps_header = ps_out[0]
         # guess columns width from ps header :
-        # PID and PPID right aligned
+        # PID and PPID right aligned (and UID if used)
         # '  PID  PPID USER     COMMAND  COMMAND'
         b_ppid = ps_header.find('PID') + 4
-        b_user = ps_header.find('USER')
+        b_user = ps_header.find('PPID') + 5
         b_comm = ps_header.find('COMMAND')
         b_args = ps_header.find('COMMAND', b_comm+1)
         for line in ps_out:
             #(pid, ppid, user, comm, args) = line.split(maxsplit=4)
-            pid = line[0:b_ppid-1].lstrip(' ')
-            ppid = line[b_ppid:b_user-1].lstrip(' ')
-            user = line[b_user:b_comm-1].rstrip(' ')
-            comm = line[b_comm:b_args-1].rstrip(' ')
+            pid = line[0:b_ppid-1].strip(' ')
+            ppid = line[b_ppid:b_user-1].strip(' ')
+            user = line[b_user:b_comm-1].strip(' ')
+            comm = line[b_comm:b_args-1].strip(' ')
             args = line[b_args:]
             #print(pid,ppid,user)
             if not (ppid in self.children):
@@ -180,7 +182,10 @@ def main():
     # We don't want to use argparse module as we are not in a fancy developer zone
     # We are sys admins we are facing very hazardous environments (python 2.4 or less)
     usage = """
-    usage: pgtree.py [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-U] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+
+    -I : use -o uid instead of -o user for ps command
+    (user names resolution may be unusable : ldap/idm...)
 
     -c : display processes and children only 
     -k : kill -TERM processes and children
@@ -199,7 +204,11 @@ def main():
     sig = 0
     child_only = False
     found = []
-    # switch case in python useless...
+    use_uid = False
+    if sys.argv[1] == '-I':
+        use_uid = True
+        sys.argv.pop(1)
+
     if sys.argv[1] == '-k':
         sig = 15
         sys.argv.pop(1)
@@ -223,9 +232,9 @@ def main():
         found.remove(pid)
     rmam="\x1b[?7l"
     smam="\x1b[?7h"
+    ptree = Proctree(pids=found, use_uid=use_uid)
     if sys.stdout.isatty():
         sys.stdout.write(rmam)
-    ptree = Proctree(found)
     if sig:
         ptree.kill_with_children(sig)
     else:
