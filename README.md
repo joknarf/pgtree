@@ -32,11 +32,14 @@ Should work on any Unix that can execute :
 
 ## Examples
 show all parents and children of processes matching `bash`
-![pgtree_bash](https://user-images.githubusercontent.com/10117818/90019684-10f37680-dcaf-11ea-8e32-8f2b57304f92.png)
+
+<img alt="# pgtree bash" src="https://user-images.githubusercontent.com/10117818/90019684-10f37680-dcaf-11ea-8e32-8f2b57304f92.png" width="600px">
 
 show processes matching `bash` and their children
-![pgtree-c_bash](https://user-images.githubusercontent.com/10117818/90019719-19e44800-dcaf-11ea-8793-f32f50565406.png)
+
+<img alt="# pgtree -c bash" src="https://user-images.githubusercontent.com/10117818/90019719-19e44800-dcaf-11ea-8793-f32f50565406.png" width="600px">
 
  kill all `sh`processes of user joknarf  and its children
-![pgtree_-k](https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png)
+ 
+<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
  
