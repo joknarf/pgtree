@@ -13,17 +13,18 @@ Should work on any Unix that can execute :
 ## Usage
 ```
 # ./pgtree.py -h
-    usage: pgtree.py [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-C] [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
-    -c : display processes and children only 
+    -c : display processes and children only
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
+    -C : no color (default colored output on tty)
 
     by default display full process hierarchy (parents + children of selected processes)
 
-    -p <pids> : select processes pids to display hierarchy
+    -p <pids> : select processes pids to display hierarchy (default 1)
     <pgrep args> : use pgrep to select processes (see pgrep -h)
 
     found pids are prefixed with ▶
