@@ -31,40 +31,11 @@ Should work on any Unix that can execute :
 
 ## Examples
 show all parents and children of processes matching `bash`
-``` 
-# ./pgtree.py bash
-  1 (root) [init] /init
-  ├─6 (root) [init] /init
-  │ └─7 (root) [init] /init
-▶ │   └─8 (joknarf) [bash] -bash
-  │     └─2435 (joknarf) [python] python /mnt/c/Users/knarf/PycharmProjects/pgtree/pgtree.py bash
-  │       └─2437 (joknarf) [ps] ps -e -o pid,ppid,user,comm,args
-  └─1723 (root) [init] /init
-    └─1725 (root) [init] /init
-▶     └─1729 (joknarf) [bash] -bash
-        └─1902 (root) [sudo] sudo su -
-          └─1903 (root) [su] su -
-▶           └─1905 (root) [bash] -su
-```
+![pgtree_bash](https://user-images.githubusercontent.com/10117818/90019684-10f37680-dcaf-11ea-8e32-8f2b57304f92.png)
 
 show processes matching `bash` and their children
-```
-# ./pgtree.py -c bash
-▶ 8 (joknarf) [bash] -bash
-  └─2441 (joknarf) [python] python /mnt/c/Users/knarf/PycharmProjects/pgtree/pgtree.py -c bash
-    └─2443 (joknarf) [ps] ps -e -o pid,ppid,user,comm,args
-▶ 1729 (joknarf) [bash] -bash
-  └─1902 (root) [sudo] sudo su -
-    └─1903 (root) [su] su -
-▶     └─1905 (root) [bash] -su
-```
- 
+![pgtree_-k](https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png)
+
  kill all `sh`processes of user joknarf  and its children
- ```
-# ./pgtree.py -K -u joknarf -x sh
-▶ 2478 (joknarf) [sh] sh
-  ├─2480 (joknarf) [sleep] sleep 9999
-  └─2481 (joknarf) [top] top
-kill 2481 2480 2478
-Confirm (y/[n]) ? y
-```
+![pgtree-c_bash](https://user-images.githubusercontent.com/10117818/90019719-19e44800-dcaf-11ea-8793-f32f50565406.png)
+ 
