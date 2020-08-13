@@ -32,16 +32,20 @@ import os
 import getopt
 import subprocess
 
+# pylint: disable=E0602
+# pylint: disable=E1101
 if sys.version_info < (3, 0):
     reload(sys)
     sys.setdefaultencoding('utf8')
 
 def runcmd(cmd):
+    """run command"""
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out.decode('utf8').rstrip('\n'), std_err
 
 def ask(prompt):
+    """input text"""
     try:
         answer = raw_input(prompt)
     except NameError:
@@ -54,127 +58,136 @@ class Proctree:
     Manage process tree of pids
     Proctree([ 'pid1', 'pid2' ])
     """
-    def __init__(self, pids=['1'], use_uid=False, color=False):
+    COLOR_FG = "\x1b[38;5;"
+    COLOR_RESET = "\x1b[0m"
+
+    def __init__(self, pids=('1'), use_uid=False, color=False):
+        """constructor"""
         self.pids = pids         # pids to display hierarchy
-        self.psinfo = {}         # ps command info stored
+        self.ps_info = {}        # ps command info stored
         self.parent = {}         # parent of pid
         self.children = {}       # children of pid
-        self.parents = {}        # all parents of pid in self.pids
-        self.tree = {}           # tree for self.pids
         self.selected_pids = []  # pids and their children
-        self.get_psinfo(use_uid)
-        self.build_tree()
+        self.pids_tree = {}
+        self.top_parents = []
         self.colors = {}
         if color:
-            self.col_fg = "\x1b[38;5;"
-            self.col_reset = "\x1b[0m"
             self.colors = {
                 'pid': '12',
                 'user': '3',
                 'comm': '2',
             }
+        self.get_psinfo(use_uid)
+        self.build_tree()
 
     def get_psinfo(self, use_uid):
+        """parse unix ps command"""
         user = 'uid' if use_uid else 'user'
-        (code, out, err) = runcmd(['ps', '-e', '-o', 'pid,ppid,'+user+',comm,args'])
+        out = runcmd(['ps', '-e', '-o', 'pid,ppid,'+user+',comm,args'])[1]
         ps_out = out.split('\n')
-        ps_header = ps_out[0]
         # cannot split as space char can occur in comm
         # guess columns width from ps header :
         # PID and PPID right aligned (and UID if used)
         # '  PID  PPID USER     COMMAND  COMMAND'
-        b_ppid = ps_header.find('PID') + 4
-        b_user = ps_header.find('PPID') + 5
-        b_comm = ps_header.find('COMMAND')
-        b_args = ps_header.find('COMMAND', b_comm+1)
+        col_b = {
+            'pid': 0,
+            'ppid': ps_out[0].find('PID') + 4,
+            'user': ps_out[0].find('PPID') + 5,
+            'comm': ps_out[0].find('COMMAND'),
+        }
+        col_b['args'] = ps_out[0].find('COMMAND', col_b['comm']+1)
         for line in ps_out:
-            pid = line[0:b_ppid-1].strip(' ')
-            ppid = line[b_ppid:b_user-1].strip(' ')
-            user = line[b_user:b_comm-1].strip(' ')
-            comm = line[b_comm:b_args-1].strip(' ')
-            args = line[b_args:]
-            if not (ppid in self.children):
+            pid = line[0:col_b['ppid']-1].strip(' ')
+            ppid = line[col_b['ppid']:col_b['user']-1].strip(' ')
+            if not ppid in self.children:
                 self.children[ppid] = []
             self.children[ppid].append(pid)
             self.parent[pid] = ppid
-            self.psinfo[pid] = {
+            self.ps_info[pid] = {
                 'ppid': ppid,
-                'user': user,
-                'comm': comm,
-                'args': args,
+                'user': line[col_b['user']:col_b['comm']-1].strip(' '),
+                'comm': line[col_b['comm']:col_b['args']-1].strip(' '),
+                'args': line[col_b['args']:],
             }
 
-    # parents[pid] = [ '1', '12', '130' ] (ordered parent pids)
     def get_parents(self):
-        self.parents = {}
+        """get parents list of pids"""
         for pid in self.pids:
-            if not pid in self.parent:
+            if pid not in self.parent:
                 continue
-            self.parents[pid] = []
-            ppid = self.parent[pid]
-            while ppid in self.parent:
-                self.parents[pid].insert(0, ppid)
-                ppid = self.parent[ppid]
+            while pid in self.parent:
+                ppid = self.parent[pid]
+                if ppid not in self.pids_tree:
+                    self.pids_tree[ppid] = []
+                if pid not in self.pids_tree[ppid]:
+                    self.pids_tree[ppid].append(pid)
+                last_ppid = pid
+                pid = ppid
+            if last_ppid not in self.top_parents:
+                self.top_parents.append(last_ppid)
 
     # recursive
-    def children2tree(self, tree, pid):
-        tree[pid] = self.psinfo[pid]
-        tree[pid]['children'] = {}
-        if pid in self.children:
-            for cpid in self.children[pid]:
-                self.children2tree(tree[pid]['children'], cpid)
+    def children2tree(self, pids):
+        """build children tree"""
+        for pid in pids:
+            if pid in self.pids_tree:
+                continue
+            if pid in self.children:
+                self.pids_tree[pid] = self.children[pid]
+                self.children2tree(self.children[pid])
 
     def build_tree(self):
+        """build process tree"""
+        self.children2tree(self.pids)
         self.get_parents()
-        for foundpid in self.parents:
-            current = self.tree
-            for ppid in self.parents[foundpid]:
-                if ppid not in current:
-                    current[ppid] = self.psinfo[ppid]
-                    current[ppid]['children'] = {}
-                current = current[ppid]['children']
-            if foundpid not in current:
-                self.children2tree(current, foundpid)
+
 
     def colorize(self, field, value):
+        """colorize fields"""
         if field in self.colors:
-            return self.col_fg + self.colors[field] + "m" + value + self.col_reset
-        else:
-            return value
+            return self.COLOR_FG + self.colors[field] + "m" + value + self.COLOR_RESET
+        return value
 
-    # recursive process tree display
-    def _print_tree(self, tree, print_it=True, pre=' '):
-        n = 1
-        for pid, info in tree.items():
-            next_p = ''
-            ppre = pre
-            if pid in self.pids:
-                print_it = True
-                ppre = '▶' + pre[1:]   # ⇒ 🠖 🡆 ➤ ➥ ► ▶
-            if print_it:
-                self.selected_pids.insert(0, pid)
-                if pre == ' ':         # head of hierarchy
-                    curr_p = next_p = ' '
-                elif n == len(tree):   # last child
-                    curr_p = '└─'
-                    next_p = '  '
-                else:                  # not last child
-                    curr_p = '├─'
-                    next_p = '│ '
-                psinfo = self.colorize('pid', pid) +\
-                         self.colorize('user', ' ('+info['user']+') ') +\
-                         self.colorize('comm', '['+info['comm']+'] ') +\
-                         info['args']
-                output = ppre + curr_p + psinfo
-                print(output)
-            self._print_tree(info['children'], print_it, pre+next_p)
-            n += 1
+    def print_proc(self, pid, pre, print_it, last):
+        """display process information with indent/tree/colors"""
+        next_p = ''
+        ppre = pre
+        if pid in self.pids:
+            print_it = True
+            ppre = '▶' + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
+        if print_it:
+            self.selected_pids.insert(0, pid)
+            if pre == ' ':  # head of hierarchy
+                curr_p = next_p = ' '
+            elif last:  # last child
+                curr_p = '└─'
+                next_p = '  '
+            else:  # not last child
+                curr_p = '├─'
+                next_p = '│ '
+            ps_info = self.colorize('pid', pid) + \
+                      self.colorize('user', ' (' + self.ps_info[pid]['user'] + ') ') + \
+                      self.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ') + \
+                      self.ps_info[pid]['args']
+            output = ppre + curr_p + ps_info
+            print(output)
+        return (next_p, print_it)
+
+    # recursive
+    def _print_tree(self, pids, print_it=True, pre=' '):
+        """display wonderful process tree"""
+        for idx, pid in enumerate(pids):
+            (next_p, print_it) = self.print_proc(pid, pre, print_it, idx == len(pids)-1)
+            if pid in self.pids_tree:
+                self._print_tree(self.pids_tree[pid], print_it, pre+next_p)
 
     def print_tree(self, child_only):
-        self._print_tree(self.tree, not child_only)
+        """display full or children only process tree"""
+        self._print_tree(self.top_parents, not child_only)
 
     def kill_with_children(self, sig=15, confirmed=False):
-        self._print_tree(self.tree, False)
+        """kill processes and children with signal"""
+        self._print_tree(self.top_parents, False)
         if len(self.selected_pids) == 0:
             return
         print("kill "+" ".join(self.selected_pids))
@@ -195,6 +208,7 @@ class Proctree:
 
 
 def main():
+    """pgtree command line"""
     usage = """
     usage: pgtree.py [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
@@ -213,7 +227,9 @@ def main():
     found pids are prefixed with ▶
     """
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ICckKfxvinop:u:U:g:G:P:s:t:F:", ["ns=", "nslist="])
+        opts, args = getopt.getopt(sys.argv[1:],
+                                   "ICckKfxvinop:u:U:g:G:P:s:t:F:",
+                                   ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
@@ -223,36 +239,34 @@ def main():
     child_only = False
     sig = 0
     pgrep_args = []
-    found = ['1']
-    for o, a in opts:
-        if o == "-I":
+    found = ('1')
+    for opt, arg in opts:
+        if opt == "-I":
             use_uid = True
-        elif o == "-C":
+        elif opt == "-C":
             color = False
-        elif o == "-c":
+        elif opt == "-c":
             child_only = True
-        elif o == "-k":
+        elif opt == "-k":
             sig = 15
-        elif o == "-K":
+        elif opt == "-K":
             sig = 9
-        elif o == "-p":
-            found = a.split(',')
-        elif o in ("-f", "-x", "-v", "-i", "-n", "-o"):
-            pgrep_args.append(o)
-        elif o in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
-            pgrep_args += [o, a]
+        elif opt == "-p":
+            found = arg.split(',')
+        elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
+            pgrep_args.append(opt)
+        elif opt in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
+            pgrep_args += [opt, arg]
     pgrep_args += args
     if pgrep_args:
-        code, pgrep, err = runcmd(['/usr/bin/pgrep'] + pgrep_args)
+        pgrep = runcmd(['/usr/bin/pgrep'] + pgrep_args)[1]
         found = pgrep.split("\n")
     pid = str(os.getpid())
     if pid in found:
         found.remove(pid)
-    rmam="\x1b[?7l"
-    smam="\x1b[?7h"
-    # truncate lines if tty output
+    # truncate lines if tty output / disable color if not tty
     if sys.stdout.isatty():
-        sys.stdout.write(rmam)
+        sys.stdout.write("\x1b[?7l") # rmam
     else:
         color = False
     ptree = Proctree(pids=found, use_uid=use_uid, color=color)
@@ -261,7 +275,7 @@ def main():
     else:
         ptree.print_tree(child_only)
     if sys.stdout.isatty():
-       sys.stdout.write(smam)
+        sys.stdout.write("\x1b[?7h") # smam
 
 
 if __name__ == '__main__':
