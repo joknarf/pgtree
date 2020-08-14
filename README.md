@@ -1,4 +1,4 @@
-![Travis CI](https://travis-ci.com/joknarf/pgtree.svg?branch=master)
+[![Travis CI](https://travis-ci.com/joknarf/pgtree.svg?branch=master)](https://travis-ci.com/github/joknarf/pgtree)
 
 # pgtree
 Unix process hierachy tree for specific processes (kind of mixed pgrep + pstree)
