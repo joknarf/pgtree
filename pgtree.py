@@ -65,7 +65,6 @@ class Proctree:
         """constructor"""
         self.pids = pids         # pids to display hierarchy
         self.ps_info = {}        # ps command info stored
-        self.parent = {}         # parent of pid
         self.children = {}       # children of pid
         self.selected_pids = []  # pids and their children
         self.pids_tree = {}
@@ -96,13 +95,12 @@ class Proctree:
             'comm': ps_out[0].find('COMMAND'),
         }
         col_b['args'] = ps_out[0].find('COMMAND', col_b['comm']+1)
-        for line in ps_out:
+        for line in ps_out[1:]:
             pid = line[0:col_b['ppid']-1].strip(' ')
             ppid = line[col_b['ppid']:col_b['user']-1].strip(' ')
             if not ppid in self.children:
                 self.children[ppid] = []
             self.children[ppid].append(pid)
-            self.parent[pid] = ppid
             self.ps_info[pid] = {
                 'ppid': ppid,
                 'user': line[col_b['user']:col_b['comm']-1].strip(' '),
@@ -113,10 +111,10 @@ class Proctree:
     def get_parents(self):
         """get parents list of pids"""
         for pid in self.pids:
-            if pid not in self.parent:
+            if pid not in self.ps_info:
                 continue
-            while pid in self.parent:
-                ppid = self.parent[pid]
+            while pid in self.ps_info:
+                ppid = self.ps_info[pid]['ppid']
                 if ppid not in self.pids_tree:
                     self.pids_tree[ppid] = []
                 if pid not in self.pids_tree[ppid]:
