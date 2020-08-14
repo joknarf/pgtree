@@ -1,0 +1,11 @@
+# .travis.yml
+
+language: python
+python: 3.6
+cache: pip
+dist: xenial
+install:
+  - pip install pipenv
+  - pipenv install --dev
+script:
+  - pipenv run nosetests
