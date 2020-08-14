@@ -8,4 +8,4 @@ install:
   - pip install pipenv
   - pipenv install --dev
 script:
-  - pipenv run nosetests
+  - pipenv run nosetests -v -s
