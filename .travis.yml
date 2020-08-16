@@ -8,5 +8,6 @@ install:
   - pip install pipenv
   - pipenv install --dev
 script:
+  - pipenv run python ./pgtree.py
   - pipenv run pylint pgtree.py
   - pipenv run nosetests -v -s
