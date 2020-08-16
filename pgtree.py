@@ -179,9 +179,12 @@ class Proctree:
             if pid in self.pids_tree:
                 self._print_tree(self.pids_tree[pid], print_it, pre+next_p)
 
-    def print_tree(self, child_only):
+    def print_tree(self, child_only, sig=0, confirmed=False):
         """display full or children only process tree"""
-        self._print_tree(self.top_parents, not child_only)
+        if sig:
+            self.kill_with_children(sig=sig, confirmed=confirmed)
+        else:
+            self._print_tree(self.top_parents, not child_only)
 
     def kill_with_children(self, sig=15, confirmed=False):
         """kill processes and children with signal"""
@@ -215,6 +218,7 @@ def main():
     -c : display processes and children only 
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
+    -y : do not ask for confirmation to kill
     -C : no color (default colored output on tty)
 
     by default display full process hierarchy (parents + children of selected processes)
@@ -226,26 +230,19 @@ def main():
     """
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "ICckKfxvinop:u:U:g:G:P:s:t:F:",
+                                   "ICckKfxvinoyp:u:U:g:G:P:s:t:F:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
 
-    use_uid = False
-    color = True
-    child_only = False
     sig = 0
     pgrep_args = []
     found = ('1')
+    options = {}
     for opt, arg in opts:
-        if opt == "-I":
-            use_uid = True
-        elif opt == "-C":
-            color = False
-        elif opt == "-c":
-            child_only = True
-        elif opt == "-k":
+        options[opt] = args
+        if opt == "-k":
             sig = 15
         elif opt == "-K":
             sig = 9
@@ -264,16 +261,14 @@ def main():
         found.remove(pid)
     # truncate lines if tty output / disable color if not tty
     if sys.stdout.isatty():
-        sys.stdout.write("\x1b[?7l") # rmam
+        sys.stdout.write("\x1b[?7l")  # rmam
+        after = "\x1b[?7h"            # smam
     else:
-        color = False
-    ptree = Proctree(pids=found, use_uid=use_uid, color=color)
-    if sig:
-        ptree.kill_with_children(sig)
-    else:
-        ptree.print_tree(child_only)
-    if sys.stdout.isatty():
-        sys.stdout.write("\x1b[?7h") # smam
+        options['-C'] = ''
+        after = ''
+    ptree = Proctree(pids=found, use_uid='-I' in options, color='-C' not in options)
+    ptree.print_tree(child_only='-c' in options, sig=sig, confirmed='-y' in options)
+    sys.stdout.write(after)
 
 
 if __name__ == '__main__':
