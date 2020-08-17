@@ -1,13 +1,17 @@
 # .travis.yml
 
 language: python
-python: 3.6
+python: 
+  - "2.7"
+  - "3.6"
 cache: pip
 dist: xenial
 install:
-  - pip install pipenv
-  - pipenv install --dev
+  - pip install nose
+  - pip install lint
+  - pip install codecov
+  - pip install incremental
 script:
-  - pipenv run python ./pgtree.py
-  - pipenv run pylint pgtree.py
-  - pipenv run nosetests -v -s
+  - python pgtree/pgtree.py
+  - pylint pgtree/pgtree.py
+  - nosetests -v -s

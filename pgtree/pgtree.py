@@ -27,10 +27,11 @@ __author__ = "Franck Jouvanceau"
 __copyright__ = "Copyright 2020, Franck Jouvanceau"
 __license__ = "MIT"
 
+#    from ._version import __version__
+import subprocess
 import sys
 import os
 import getopt
-import subprocess
 
 # pylint: disable=E0602
 # pylint: disable=E1101
