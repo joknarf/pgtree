@@ -1,4 +1,5 @@
 [![Travis CI](https://travis-ci.com/joknarf/pgtree.svg?branch=master)](https://travis-ci.com/github/joknarf/pgtree)
+[![Codecov](https://codecov.io/github/joknarf/pgtree/coverage.svg?branch=master)](https://codecov.io/gh/joknarf/pgtree)
 
 # pgtree
 Unix process hierachy tree for specific processes (kind of mixed pgrep + pstree)
