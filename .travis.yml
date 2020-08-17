@@ -7,12 +7,12 @@ python:
 cache: pip
 dist: xenial
 install:
-  - pip install nose
-  - pip install lint
-  - pip install codecov
-  - pip install incremental
+  - pip install lint codecov incremental
 script:
   - python pgtree/pgtree.py
   - pylint pgtree/pgtree.py ; echo done
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then exit 0; fi
-  - nosetests -v -s
+  - python -m unittest discover -s tests/
+  - coverage run tests/test_pgtree.py
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
