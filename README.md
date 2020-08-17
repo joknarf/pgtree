@@ -27,24 +27,23 @@ user install
 ## Usage
 ```
 # pgtree -h
-    usage: pgtree.py [-C] [-I] [-c|-k|-K][-y] [-p <pid1>,...|<pgrep args>]
-
-    -I : use -o uid instead of -o user for ps command
-         (if uid/user mapping is broken ps command can be stuck)
-    -c : display processes and children only
-    -k : kill -TERM processes and children
-    -K : kill -KILL processes and children
-    -y : do not ask for confirmation to kill
-    -C : no color (default colored output on tty)
-
-    by default display full process hierarchy (parents + children of selected processes)
-
-    -p <pids> : select processes pids to display hierarchy (default 1)
-    <pgrep args> : use pgrep to select processes (see pgrep -h)
-
-    found pids are prefixed with ▶
+#    usage: pgtree.py [-C] [-I] [-c|-k|-K][-y] [-p <pid1>,...|<pgrep args>]
+#
+#    -I : use -o uid instead of -o user for ps command
+#         (if uid/user mapping is broken ps command can be stuck)
+#    -c : display processes and children only
+#    -k : kill -TERM processes and children
+#    -K : kill -KILL processes and children
+#    -y : do not ask for confirmation to kill
+#    -C : no color (default colored output on tty)
+#
+#    by default display full process hierarchy (parents + children of selected processes)
+#
+#    -p <pids> : select processes pids to display hierarchy (default 1)
+#    <pgrep args> : use pgrep to select processes (see pgrep -h)
+#
+#    found pids are prefixed with ▶
 ```
-
 ## Examples
 show all parents and children of processes matching `bash`
 
@@ -54,7 +53,6 @@ show processes matching `bash` and their children
 
 <img alt="# pgtree -c bash" src="https://user-images.githubusercontent.com/10117818/90019719-19e44800-dcaf-11ea-8793-f32f50565406.png" width="600px">
 
- kill all `sh`processes of user joknarf  and their children
- 
-<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
- 
+kill all `sh` processes of user joknarf and their children
+
+i<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
