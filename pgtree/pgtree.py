@@ -190,7 +190,7 @@ class Proctree:
     def kill_with_children(self, sig=15, confirmed=False):
         """kill processes and children with signal"""
         self._print_tree(self.top_parents, False)
-        if len(self.selected_pids) == 0:
+        if not self.selected_pids:
             return
         print("kill "+" ".join(self.selected_pids))
         if not confirmed:
