@@ -14,4 +14,5 @@ install:
 script:
   - python pgtree/pgtree.py
   - pylint pgtree/pgtree.py ; echo done
-  - [ "TRAVIS_PYTHON_VERSION" -gt 3 ] && nosetests -v -s
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then exit 0; fi
+  - nosetests -v -s
