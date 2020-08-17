@@ -3,7 +3,7 @@ import sys
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from pgtree import *
+import pgtree
 
 class ProctreeTest(unittest.TestCase):
     @patch('pgtree.runcmd')
@@ -15,7 +15,7 @@ class ProctreeTest(unittest.TestCase):
    30    10 joknarf  top             /bin/top
    40     1 root     bash            -bash"""
         mock_runcmd.return_value = (0, ps, '')
-        ptree = Proctree(pids=['10'])
+        ptree = pgtree.Proctree(pids=['10'])
 
         children = {
                 '0': ['1'],
@@ -66,6 +66,9 @@ class ProctreeTest(unittest.TestCase):
         self.assertEqual(ptree.ps_info, ps_info)
         self.assertEqual(ptree.pids_tree, pids_tree)
         self.assertEqual(ptree.selected_pids, selected_pids)
+
+    def test_tree2(self):
+        pgtree.main()
 
 if __name__ == "__main__":
     unittest.main(failfast=True)
