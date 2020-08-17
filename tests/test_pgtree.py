@@ -9,6 +9,7 @@ class ProctreeTest(unittest.TestCase):
     @patch('os.kill')
     @patch('pgtree.runcmd')
     def test_tree1(self, mock_runcmd, mock_kill):
+        print("tree: =======")
         ps = """  PID  PPID USER     COMMAND         COMMAND
     1     0 root     init            /init
    10     1 joknarf  bash            -bash
@@ -70,9 +71,20 @@ class ProctreeTest(unittest.TestCase):
         self.assertEqual(ptree.selected_pids, selected_pids)
         ptree.print_tree(True, sig=15, confirmed=True)
 
-    def test_tree2(self):
+    def test_main(self):
+        print('main =========')
         pgtree.main([])
-        pgtree.main(['-c','-u','root','-f','bash'])
+
+    def test_main2(self):
+        print('main2 ========')
+        pgtree.main(['-c','-u','root','-f','sshd'])
+
+    @patch('os.kill')
+    def test_main3(self, mock_kill):
+        print('main3 ========')
+        mock_kill.return_value = True
+        pgtree.main(['-k','-p','1111'])
+        pgtree.main(['-K','-p','1111'])
 
 if __name__ == "__main__":
     unittest.main(failfast=True)
