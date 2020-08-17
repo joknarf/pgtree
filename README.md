@@ -2,10 +2,12 @@
 [![Codecov](https://codecov.io/github/joknarf/pgtree/coverage.svg?branch=master)](https://codecov.io/gh/joknarf/pgtree)
 
 # pgtree
-Unix process hierachy tree for specific processes (kind of mixed pgrep + pstree)
+Unix process hierachy tree display for specific processes (kind of mixed pgrep + pstree)
+
+pgtree is also able to send signal to found processes and all their children
 
 The purpose is to have the tool working out of the box on any Unix box, using the default OS python installed, without installing anything else.
-The code must be compatible with python 2 + 3
+The code must be compatible with python 2.x + 3.x
 
 Should work on any Unix that can execute :
 ```
@@ -51,7 +53,7 @@ show processes matching `bash` and their children
 
 <img alt="# pgtree -c bash" src="https://user-images.githubusercontent.com/10117818/90019719-19e44800-dcaf-11ea-8793-f32f50565406.png" width="600px">
 
- kill all `sh`processes of user joknarf  and its children
+ kill all `sh`processes of user joknarf  and their children
  
 <img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
  
