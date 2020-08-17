@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/joknarf/pgtree",
     packages=["pgtree"],
-    scripts=["pgtree/pgtree.py"],
+    scripts=["pgtree/pgtree"],
     use_incremental=True,
     setup_requires=['incremental'],
     install_requires=['incremental'],
