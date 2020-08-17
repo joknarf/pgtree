@@ -86,5 +86,12 @@ class ProctreeTest(unittest.TestCase):
         pgtree.main(['-k','-p','1111'])
         pgtree.main(['-K','-p','1111'])
 
+    def test_main4(self):
+        print('main4 ========')
+        try: 
+            pgtree.main(['-h'])
+        except SystemExit:
+            pass
+
 if __name__ == "__main__":
     unittest.main(failfast=True)
