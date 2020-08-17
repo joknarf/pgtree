@@ -71,7 +71,8 @@ class ProctreeTest(unittest.TestCase):
         ptree.print_tree(True, sig=15, confirmed=True)
 
     def test_tree2(self):
-        pgtree.main()
+        pgtree.main([])
+        pgtree.main(['-c','-u','root','-f','bash'])
 
 if __name__ == "__main__":
     unittest.main(failfast=True)

@@ -209,7 +209,7 @@ class Proctree:
                 continue
 
 
-def main():
+def main(argv):
     """pgtree command line"""
     usage = """
     usage: pgtree.py [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
@@ -230,7 +230,7 @@ def main():
     found pids are prefixed with ▶
     """
     try:
-        opts, args = getopt.getopt(sys.argv[1:],
+        opts, args = getopt.getopt(argv,
                                    "ICckKfxvinoyp:u:U:g:G:P:s:t:F:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
@@ -273,4 +273,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
