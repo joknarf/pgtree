@@ -11,17 +11,26 @@ Should work on any Unix that can execute :
 # /usr/bin/pgrep 
 # /usr/bin/ps -e -o pid,ppid,user,comm,args
 ```
-
+## Installation
+root install in `/usr/local/bin`
+```
+# ./setup.py install
+```
+user install
+```
+# ./setup.py install --prefix=~/.local
+```
 ## Usage
 ```
-# ./pgtree.py -h
-    usage: pgtree.py [-C] [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+# pgtree -h
+    usage: pgtree.py [-C] [-I] [-c|-k|-K][-y] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
     -c : display processes and children only
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
+    -y : do not ask for confirmation to kill
     -C : no color (default colored output on tty)
 
     by default display full process hierarchy (parents + children of selected processes)
