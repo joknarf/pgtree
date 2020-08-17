@@ -6,8 +6,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import pgtree
 
 class ProctreeTest(unittest.TestCase):
+    @patch('os.kill')
     @patch('pgtree.runcmd')
-    def test_tree1(self, mock_runcmd):
+    def test_tree1(self, mock_runcmd, mock_kill):
         ps = """  PID  PPID USER     COMMAND         COMMAND
     1     0 root     init            /init
    10     1 joknarf  bash            -bash
@@ -15,6 +16,7 @@ class ProctreeTest(unittest.TestCase):
    30    10 joknarf  top             /bin/top
    40     1 root     bash            -bash"""
         mock_runcmd.return_value = (0, ps, '')
+        mock_kill.return_value = True
         ptree = pgtree.Proctree(pids=['10'])
 
         children = {
@@ -66,6 +68,7 @@ class ProctreeTest(unittest.TestCase):
         self.assertEqual(ptree.ps_info, ps_info)
         self.assertEqual(ptree.pids_tree, pids_tree)
         self.assertEqual(ptree.selected_pids, selected_pids)
+        ptree.print_tree(True, sig=15, confirmed=True)
 
     def test_tree2(self):
         pgtree.main()
