@@ -92,6 +92,12 @@ class ProctreeTest(unittest.TestCase):
             pgtree.main(['-h'])
         except SystemExit:
             pass
+     
+    @patch('builtins.input')
+    def test_main5(self, mock_input):
+        print('main5 ========')
+        mock_input.return_value = 'n'
+        pgtree.main(['-k','sshd'])
 
 if __name__ == "__main__":
     unittest.main(failfast=True)
