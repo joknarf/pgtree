@@ -66,4 +66,5 @@ kill all `sh` processes of user joknarf and their children
 
 ## Demo
 
-![output](https://user-images.githubusercontent.com/10117818/90572824-415a7980-e1b5-11ea-840a-f5c52d85b4a9.gif)
+<img alt="output" src="https://user-images.githubusercontent.com/10117818/90572824-415a7980-e1b5-11ea-840a-f5c52d85b4a9.gif" width="600px">
+
