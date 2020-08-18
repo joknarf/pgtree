@@ -16,11 +16,17 @@ Should work on any Unix that can execute :
 # /usr/bin/ps -e -o pid,ppid,user,comm,args
 ```
 ## Installation
-root install in `/usr/local/bin`
+FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
+
+pip installation :
+```
+# pip install pgtree
+```
+root install in `/usr/local/bin` :
 ```
 # ./setup.py install
 ```
-user install
+user install :
 ```
 # ./setup.py install --prefix=~/.local
 ```
@@ -55,4 +61,4 @@ show processes matching `bash` and their children
 
 kill all `sh` processes of user joknarf and their children
 
-i<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
+<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
