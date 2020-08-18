@@ -18,15 +18,15 @@ Should work on any Unix that can execute :
 ## Installation
 FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
 
-pip installation :
+installation using pip:
 ```
 # pip install pgtree
 ```
-root install in `/usr/local/bin` :
+installation using setup.py, root install in `/usr/local/bin`:
 ```
 # ./setup.py install
 ```
-user install :
+installation using setup.py, user install in `~/.local/bin`:
 ```
 # ./setup.py install --prefix=~/.local
 ```
