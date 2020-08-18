@@ -63,3 +63,7 @@ show processes matching `bash` and their children
 kill all `sh` processes of user joknarf and their children
 
 <img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
+
+## Demo
+
+![output](https://user-images.githubusercontent.com/10117818/90572824-415a7980-e1b5-11ea-840a-f5c52d85b4a9.gif)
