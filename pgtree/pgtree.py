@@ -234,7 +234,7 @@ class Proctree:
 def main(argv):
     """pgtree command line"""
     usage = """
-    usage: pgtree.py [-I] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-Iya] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -243,13 +243,14 @@ def main(argv):
     -K : kill -KILL processes and children
     -y : do not ask for confirmation to kill
     -C : no color (default colored output on tty)
+    -a : use ascii characters
 
     by default display full process hierarchy (parents + children of selected processes)
 
     -p <pids> : select processes pids to display hierarchy (default 1)
     <pgrep args> : use pgrep to select processes (see pgrep -h)
 
-    found pids are prefixed with ▶
+    found pids are prefixed with ►     
     """
     try:
         opts, args = getopt.getopt(argv,
