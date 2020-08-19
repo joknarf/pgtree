@@ -27,8 +27,6 @@ __author__ = "Franck Jouvanceau"
 __copyright__ = "Copyright 2020, Franck Jouvanceau"
 __license__ = "MIT"
 
-#    from ._version import __version__
-import subprocess
 import sys
 import os
 import getopt
@@ -41,9 +39,8 @@ if sys.version_info < (3, 0):
 
 def runcmd(cmd):
     """run command"""
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    std_out, std_err = proc.communicate()
-    return proc.returncode, std_out.decode('utf8').rstrip('\n'), std_err
+    proc = os.popen('"' + '" "'.join(cmd) + '"', 'r')
+    return proc.read().rstrip('\n')
 
 def ask(prompt):
     """input text"""
@@ -111,7 +108,7 @@ class Proctree:
             user = 'uid'
         else:
             user = 'user'
-        out = runcmd(['ps', '-e', '-o', 'pid,ppid,'+user+',comm,args'])[1]
+        out = runcmd(['ps', '-e', '-o', 'pid,ppid,'+user+',comm,args'])
         ps_out = out.split('\n')
         # cannot split as space char can occur in comm
         # guess columns width from ps header :
@@ -281,7 +278,7 @@ def main(argv):
             pgrep_args += [opt, arg]
     pgrep_args += args
     if pgrep_args:
-        pgrep = runcmd(['/usr/bin/pgrep'] + pgrep_args)[1]
+        pgrep = runcmd(['/usr/bin/pgrep'] + pgrep_args)
         found = pgrep.split("\n")
     pid = str(os.getpid())
     if pid in found:
