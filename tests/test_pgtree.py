@@ -16,7 +16,7 @@ class ProctreeTest(unittest.TestCase):
    20    10 joknarf  sleep           /bin/sleep 60
    30    10 joknarf  top             /bin/top
    40     1 root     bash            -bash"""
-        mock_runcmd.return_value = (0, ps, '')
+        mock_runcmd.return_value = ps
         mock_kill.return_value = True
         ptree = pgtree.Proctree(pids=['10'])
 
