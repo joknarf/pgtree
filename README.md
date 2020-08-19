@@ -34,7 +34,7 @@ installation using setup.py, user install in `~/.local/bin`:
 ## Usage
 ```
 # pgtree -h
-    usage: pgtree.py [-C] [-I] [-c|-k|-K][-y] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-ICya] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -43,6 +43,7 @@ installation using setup.py, user install in `~/.local/bin`:
     -K : kill -KILL processes and children
     -y : do not ask for confirmation to kill
     -C : no color (default colored output on tty)
+    -a : use ascii characters
 
     by default display full process hierarchy (parents + children of selected processes)
 
