@@ -9,12 +9,13 @@ cache: pip
 #dist: xenial
 dist: trusty
 install:
-  - [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pip install lint codecov incremental; fi
+#  - pip install lint codecov incremental
 script:
   - python pgtree/pgtree.py
   - pylint pgtree/pgtree.py ; echo done
   - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then exit 0; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then exit 0; fi
+  - pip install lint codecov incremental
   - python -m unittest discover -s tests/
   - coverage run tests/test_pgtree.py
 after_success:
