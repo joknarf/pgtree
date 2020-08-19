@@ -107,7 +107,10 @@ class Proctree:
 
     def get_psinfo(self, use_uid):
         """parse unix ps command"""
-        user = 'uid' if use_uid else 'user'
+        if use_uid:
+            user = 'uid'
+        else:
+            user = 'user'
         out = runcmd(['ps', '-e', '-o', 'pid,ppid,'+user+',comm,args'])[1]
         ps_out = out.split('\n')
         # cannot split as space char can occur in comm
