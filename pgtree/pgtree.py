@@ -99,7 +99,9 @@ class Proctree:
         for line in ps_out[1:]:
             pid = line[0:col_b['ppid']-1].strip(' ')
             ppid = line[col_b['ppid']:col_b['user']-1].strip(' ')
-            if not ppid in self.children:
+            if pid == ppid:
+                ppid = '0'
+            if ppid not in self.children:
                 self.children[ppid] = []
             self.children[ppid].append(pid)
             self.ps_info[pid] = {
