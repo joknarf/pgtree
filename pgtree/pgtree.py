@@ -15,9 +15,9 @@ $ ./pgtree.py sshd
   1 (root) [init] /init
   └─6 (root) [init] /init
     └─144 (root) [systemd] /lib/systemd/systemd --system-unit=basic.target
-▶     └─483 (root) [sshd] /usr/sbin/sshd -D
-▶       └─1066 (root) [sshd] sshd: joknarf [priv]
-▶         └─1181 (joknarf) [sshd] sshd: joknarf@pts/1
+►     └─483 (root) [sshd] /usr/sbin/sshd -D
+►       └─1066 (root) [sshd] sshd: joknarf [priv]
+►         └─1181 (joknarf) [sshd] sshd: joknarf@pts/1
             └─1182 (joknarf) [bash] -bash
               ├─1905 (joknarf) [sleep] sleep 60
               └─1906 (joknarf) [top] top
@@ -53,16 +53,47 @@ def ask(prompt):
         answer = input(prompt)
     return answer
 
+# pylint: disable=R0903
+class Treedisplay:
+    """Tree display attributes"""
+    COLOR_FG = "\x1b[38;5;"
+    COLOR_RESET = "\x1b[0m"
+
+    def __init__(self, use_ascii=False, use_color=False):
+        """choose tree characters"""
+        if use_ascii:
+            self.selected = '>'
+            self.child = '|_'
+            self.notchild = '| '
+            self.lastchild = '\\_'
+        else:
+            self.selected = '►'
+            self.child = '├─'
+            self.notchild = '│ '
+            self.lastchild = '└─'
+        self.colors = {}
+        if use_color:
+            self.colors = {
+                'pid': '12',
+                'user': '3',
+                'comm': '2',
+            }
+
+    def colorize(self, field, value):
+        """colorize fields"""
+        if field in self.colors:
+            return self.COLOR_FG + self.colors[field] + "m" + value + self.COLOR_RESET
+        return value
+
+
 
 class Proctree:
     """
     Manage process tree of pids
     Proctree([ 'pid1', 'pid2' ])
     """
-    COLOR_FG = "\x1b[38;5;"
-    COLOR_RESET = "\x1b[0m"
 
-    def __init__(self, pids=('1'), use_uid=False, color=False):
+    def __init__(self, pids=('1'), use_uid=False, use_ascii=False, use_color=False):
         """constructor"""
         self.pids = pids         # pids to display hierarchy
         self.ps_info = {}        # ps command info stored
@@ -70,13 +101,7 @@ class Proctree:
         self.selected_pids = []  # pids and their children
         self.pids_tree = {}
         self.top_parents = []
-        self.colors = {}
-        if color:
-            self.colors = {
-                'pid': '12',
-                'user': '3',
-                'comm': '2',
-            }
+        self.treedisp = Treedisplay(use_ascii, use_color)
         self.get_psinfo(use_uid)
         self.build_tree()
 
@@ -99,8 +124,8 @@ class Proctree:
         for line in ps_out[1:]:
             pid = line[0:col_b['ppid']-1].strip(' ')
             ppid = line[col_b['ppid']:col_b['user']-1].strip(' ')
-            if pid == ppid:
-                ppid = '0'
+            if ppid == pid:
+                ppid = '-1'
             if ppid not in self.children:
                 self.children[ppid] = []
             self.children[ppid].append(pid)
@@ -143,11 +168,6 @@ class Proctree:
         self.get_parents()
 
 
-    def colorize(self, field, value):
-        """colorize fields"""
-        if field in self.colors:
-            return self.COLOR_FG + self.colors[field] + "m" + value + self.COLOR_RESET
-        return value
 
     def print_proc(self, pid, pre, print_it, last):
         """display process information with indent/tree/colors"""
@@ -155,20 +175,20 @@ class Proctree:
         ppre = pre
         if pid in self.pids:
             print_it = True
-            ppre = '▶' + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
+            ppre = self.treedisp.selected + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
         if print_it:
             self.selected_pids.insert(0, pid)
             if pre == ' ':  # head of hierarchy
                 curr_p = next_p = ' '
             elif last:  # last child
-                curr_p = '└─'
+                curr_p = self.treedisp.lastchild
                 next_p = '  '
             else:  # not last child
-                curr_p = '├─'
-                next_p = '│ '
-            ps_info = self.colorize('pid', pid) + \
-                      self.colorize('user', ' (' + self.ps_info[pid]['user'] + ') ') + \
-                      self.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ') + \
+                curr_p = self.treedisp.child
+                next_p = self.treedisp.notchild
+            ps_info = self.treedisp.colorize('pid', pid) + \
+                      self.treedisp.colorize('user', ' (' + self.ps_info[pid]['user'] + ') ') + \
+                      self.treedisp.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ') + \
                       self.ps_info[pid]['args']
             output = ppre + curr_p + ps_info
             print(output)
@@ -233,7 +253,7 @@ def main(argv):
     """
     try:
         opts, args = getopt.getopt(argv,
-                                   "ICckKfxvinoyp:u:U:g:G:P:s:t:F:",
+                                   "ICckKfxvinoyap:u:U:g:G:P:s:t:F:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
@@ -269,8 +289,11 @@ def main(argv):
     else:
         options['-C'] = ''
         after = ''
-    ptree = Proctree(pids=found, use_uid='-I' in options, color='-C' not in options)
-    ptree.print_tree(child_only='-c' in options, sig=sig, confirmed='-y' in options)
+    ptree = Proctree(pids=found, use_uid='-I' in options,
+                     use_ascii='-a' in options,
+                     use_color='-C' not in options)
+    ptree.print_tree(child_only='-c' in options, sig=sig,
+                     confirmed='-y' in options)
     sys.stdout.write(after)
 
 
