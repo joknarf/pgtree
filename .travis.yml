@@ -12,10 +12,10 @@ install:
 #  - pip install lint codecov incremental
 script:
   - python pgtree/pgtree.py
-  - pylint pgtree/pgtree.py ; echo done
   - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then exit 0; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then exit 0; fi
   - pip install lint codecov incremental
+  - pylint pgtree/pgtree.py ; echo done
   - python -m unittest discover -s tests/
   - coverage run tests/test_pgtree.py
 after_success:
