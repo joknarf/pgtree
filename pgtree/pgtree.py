@@ -39,8 +39,10 @@ if sys.version_info < (3, 0):
 
 def runcmd(cmd):
     """run command"""
-    proc = os.popen('"' + '" "'.join(cmd) + '"', 'r')
-    return proc.read().rstrip('\n')
+    pipe = os.popen('"' + '" "'.join(cmd) + '"', 'r')
+    std_out = pipe.read()
+    pipe.close()
+    return std_out.rstrip('\n')
 
 def ask(prompt):
     """input text"""
