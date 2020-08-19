@@ -10,12 +10,12 @@ class ProctreeTest(unittest.TestCase):
     @patch('pgtree.runcmd')
     def test_tree1(self, mock_runcmd, mock_kill):
         print("tree: =======")
-        ps = """  PID  PPID USER     COMMAND         COMMAND
-    1     0 root     init            /init
-   10     1 joknarf  bash            -bash
-   20    10 joknarf  sleep           /bin/sleep 60
-   30    10 joknarf  top             /bin/top
-   40     1 root     bash            -bash"""
+        ps = """  PID  PPID STIME USER     COMMAND         COMMAND
+    1     0 Aug12 root     init            /init
+   10     1 Aug12 joknarf  bash            -bash
+   20    10 10:10 joknarf  sleep           /bin/sleep 60
+   30    10 10:10 joknarf  top             /bin/top
+   40     1 11:01 root     bash            -bash"""
         mock_runcmd.return_value = ps
         mock_kill.return_value = True
         ptree = pgtree.Proctree(pids=['10'])
@@ -28,30 +28,35 @@ class ProctreeTest(unittest.TestCase):
         ps_info = {
                 '1': {
                     'ppid': '0',
+                    'stime': 'Aug12',
                     'user': 'root',
                     'comm': 'init',
                     'args': '/init',
                 },
                 '10': {
                     'ppid': '1',
+                    'stime': 'Aug12',
                     'user': 'joknarf',
                     'comm': 'bash',
                     'args': '-bash',
                 },
                 '20': {
                     'ppid': '10',
+                    'stime': '10:10',
                     'user': 'joknarf',
                     'comm': 'sleep',
                     'args': '/bin/sleep 60',
                 },
                 '30': {
                     'ppid': '10',
+                    'stime': '10:10',
                     'user': 'joknarf',
                     'comm': 'top',
                     'args': '/bin/top',
                 },
                 '40': {
                     'ppid': '1',
+                    'stime': '11:01',
                     'user': 'root',
                     'comm': 'bash',
                     'args': '-bash',
