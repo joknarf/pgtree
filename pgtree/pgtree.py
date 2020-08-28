@@ -171,8 +171,6 @@ class Proctree:
         self.children2tree(self.pids)
         self.get_parents()
 
-
-
     def print_proc(self, pid, pre, print_it, last):
         """display process information with indent/tree/colors"""
         next_p = ''
@@ -203,9 +201,9 @@ class Proctree:
     def _print_tree(self, pids, print_it=True, pre=' '):
         """display wonderful process tree"""
         for idx, pid in enumerate(pids):
-            (next_p, print_it) = self.print_proc(pid, pre, print_it, idx == len(pids)-1)
+            (next_p, print_children) = self.print_proc(pid, pre, print_it, idx == len(pids)-1)
             if pid in self.pids_tree:
-                self._print_tree(self.pids_tree[pid], print_it, pre+next_p)
+                self._print_tree(self.pids_tree[pid], print_children, pre+next_p)
 
     def print_tree(self, child_only, sig=0, confirmed=False):
         """display full or children only process tree"""
