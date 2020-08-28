@@ -55,17 +55,17 @@ installation using setup.py, user install in `~/.local/bin`:
 ## Examples
 show all parents and children of processes matching `bash`
 
-<img alt="# pgtree bash" src="https://user-images.githubusercontent.com/10117818/90019684-10f37680-dcaf-11ea-8e32-8f2b57304f92.png" width="600px">
+<img alt="# pgtree bash" src="https://user-images.githubusercontent.com/10117818/91555007-7d69a900-e930-11ea-98a2-8d81b7fdf0d3.png" width="850px">
 
 show processes matching `bash` and their children
 
-<img alt="# pgtree -c bash" src="https://user-images.githubusercontent.com/10117818/90019719-19e44800-dcaf-11ea-8793-f32f50565406.png" width="600px">
+<img alt="# pgtree -c bash" src="https://user-images.githubusercontent.com/10117818/91555156-c15cae00-e930-11ea-9479-7c9b2c7b249e.png" width="850px">
 
 kill all `sh` processes of user joknarf and their children
 
-<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/90019713-16e95780-dcaf-11ea-95a1-b2a8c4edf31e.png" width="600px">
+<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/91555424-48aa2180-e931-11ea-8f19-6054458aa79c.png" width="850px">
 
 ## Demo
 
-<img alt="output" src="https://user-images.githubusercontent.com/10117818/90623055-456ab380-e216-11ea-957c-f10a6b3ce269.gif" width="600px">
+<img alt="output" src="https://user-images.githubusercontent.com/10117818/91558307-64fc8d00-e936-11ea-85bc-08eae29a58ce.gif" width="850px">
 
