@@ -14,7 +14,7 @@ The code must be compatible with python 2.x + 3.x
 Should work on any Unix that can execute :
 ```
 # /usr/bin/pgrep 
-# /usr/bin/ps -e -o pid,ppid,user,comm,args
+# /usr/bin/ps -e -o pid,ppid,stime,user,comm,args
 ```
 ## Installation
 FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
