@@ -1,8 +1,8 @@
 [![Travis CI](https://travis-ci.com/joknarf/pgtree.svg?branch=master)](https://travis-ci.com/github/joknarf/pgtree)
 [![Codecov](https://codecov.io/github/joknarf/pgtree/coverage.svg?branch=master)](https://codecov.io/gh/joknarf/pgtree)
 [![Pypi version](https://img.shields.io/pypi/v/pgtree.svg)](https://pypi.org/project/pgtree/)
-[![Licence](https://img.shields.io/badge/Licence-MIT-blue.svg)](https://shields.io/)
 [![Python versions](https://img.shields.io/badge/Python-2.3+%20|%203.x-blue.svg)](https://shields.io/)
+[![Licence](https://img.shields.io/badge/Licence-MIT-blue.svg)](https://shields.io/)
 [![Downloads](https://pepy.tech/badge/pgtree)](https://pepy.tech/project/pgtree)
 
 # pgtree
