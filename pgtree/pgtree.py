@@ -175,6 +175,8 @@ class Proctree:
         """display process information with indent/tree/colors"""
         next_p = ''
         ppre = pre
+        if pid == str(os.getpid()):
+            return ('', False)
         if pid in self.pids:
             print_it = True
             ppre = self.treedisp.selected + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
@@ -223,8 +225,6 @@ class Proctree:
             if answer != 'y':
                 return
         for pid in self.selected_pids:
-            if pid == str(os.getpid()):
-                continue
             try:
                 os.kill(int(pid), sig)
             except ProcessLookupError:
