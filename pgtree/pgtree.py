@@ -126,6 +126,8 @@ class Proctree:
         col_b['args'] = ps_out[0].find('COMMAND', col_b['comm']+1)
         for line in ps_out[1:]:
             pid = line[0:col_b['ppid']-1].strip(' ')
+            if pid == str(os.getpid()):
+                continue
             ppid = line[col_b['ppid']:col_b['stime']-1].strip(' ')
             if ppid == pid:
                 ppid = '-1'
@@ -175,8 +177,6 @@ class Proctree:
         """display process information with indent/tree/colors"""
         next_p = ''
         ppre = pre
-        if pid == str(os.getpid()):
-            return ('', False)
         if pid in self.pids:
             print_it = True
             ppre = self.treedisp.selected + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
@@ -283,9 +283,6 @@ def main(argv):
     if pgrep_args:
         pgrep = runcmd(['/usr/bin/pgrep'] + pgrep_args)
         found = pgrep.split("\n")
-    pid = str(os.getpid())
-    if pid in found:
-        found.remove(pid)
     # truncate lines if tty output / disable color if not tty
     if sys.stdout.isatty():
         sys.stdout.write("\x1b[?7l")  # rmam
