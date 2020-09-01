@@ -1,6 +1,6 @@
 [![Travis CI](https://travis-ci.com/joknarf/pgtree.svg?branch=master)](https://travis-ci.com/github/joknarf/pgtree)
 [![Codecov](https://codecov.io/github/joknarf/pgtree/coverage.svg?branch=master)](https://codecov.io/gh/joknarf/pgtree)
-![Upload Python Package](https://github.com/joknarf/pgtree/workflows/Upload%20Python%20Package/badge.svg)
+[![Upload Python Package](https://github.com/joknarf/pgtree/workflows/Upload%20Python%20Package/badge.svg)](https://github.com/joknarf/pgtree/actions?query=workflow%3A%22Upload+Python+Package%22)
 [![Pypi version](https://img.shields.io/pypi/v/pgtree.svg)](https://pypi.org/project/pgtree/)
 [![Downloads](https://pepy.tech/badge/pgtree)](https://pepy.tech/project/pgtree)
 [![Python versions](https://img.shields.io/badge/python-2.3+%20|%203.x-blue.svg)](https://shields.io/)
