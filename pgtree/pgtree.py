@@ -66,7 +66,7 @@ class Treedisplay:
             self.notchild = '| '
             self.lastchild = '\\_'
         else:
-            self.selected = '►'
+            self.selected = '►' # ⇒ 🠖 🡆 ➤ ➥ ► ▶
             self.child = '├─'
             self.notchild = '│ '
             self.lastchild = '└─'
@@ -179,7 +179,7 @@ class Proctree:
         ppre = pre
         if pid in self.pids:
             print_it = True
-            ppre = self.treedisp.selected + pre[1:]  # ⇒ 🠖 🡆 ➤ ➥ ► ▶
+            ppre = self.treedisp.selected + pre[1:]
         if print_it:
             self.selected_pids.insert(0, pid)
             if pre == ' ':  # head of hierarchy
@@ -268,7 +268,7 @@ def main(argv):
     found = ('1')
     options = {}
     for opt, arg in opts:
-        options[opt] = args
+        options[opt] = arg
         if opt == "-k":
             sig = 15
         elif opt == "-K":
