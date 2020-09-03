@@ -104,5 +104,9 @@ class ProctreeTest(unittest.TestCase):
         mock_input.return_value = 'n'
         pgtree.main(['-k','sshd'])
 
+    def test_main6(self):
+        print('main6 ========')
+        pgtree.main(['-a'])
+
 if __name__ == "__main__":
     unittest.main(failfast=True)
