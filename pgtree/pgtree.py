@@ -255,6 +255,11 @@ def main(argv):
 
     found pids are prefixed with ►     
     """
+
+    # allow options after pattern : pgtree mysearch -fc
+    if len(argv) > 1 and argv[0][0] != '-':
+        argv.append(argv.pop(0))
+
     try:
         opts, args = getopt.getopt(argv,
                                    "ICckKfxvinoyap:u:U:g:G:P:s:t:F:",
