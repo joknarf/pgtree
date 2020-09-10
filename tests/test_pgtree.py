@@ -1,22 +1,26 @@
+"""pgtree tests"""
 import os
 import sys
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import pgtree
+#from unittest.mock import MagicMock, Mock, patch
 
 class ProctreeTest(unittest.TestCase):
+    """tests for pgtree"""
     @patch('os.kill')
     @patch('pgtree.runcmd')
     def test_tree1(self, mock_runcmd, mock_kill):
+        """test"""
         print("tree: =======")
-        ps = """  PID  PPID STIME USER     COMMAND         COMMAND
+        ps_out = """  PID  PPID STIME USER     COMMAND         COMMAND
     1     0 Aug12 root     init            /init
    10     1 Aug12 joknarf  bash            -bash
    20    10 10:10 joknarf  sleep           /bin/sleep 60
    30    10 10:10 joknarf  top             /bin/top
    40     1 11:01 root     bash            -bash"""
-        mock_runcmd.return_value = ps
+        mock_runcmd.return_value = ps_out
         mock_kill.return_value = True
         ptree = pgtree.Proctree(pids=['10'])
 
@@ -77,34 +81,41 @@ class ProctreeTest(unittest.TestCase):
         ptree.print_tree(True, sig=15, confirmed=True)
 
     def test_main(self):
+        """test"""
         print('main =========')
         pgtree.main([])
 
     def test_main2(self):
+        """test"""
         print('main2 ========')
-        pgtree.main(['-c','-u','root','-f','sshd'])
+        pgtree.main(['-c', '-u', 'root', '-f', 'sshd'])
+        pgtree.main(['sshd', '-cf', '-u', 'root'])
 
     @patch('os.kill')
     def test_main3(self, mock_kill):
+        """test"""
         print('main3 ========')
         mock_kill.return_value = True
         pgtree.main(['-k','-p','1111'])
         pgtree.main(['-K','-p','1111'])
 
     def test_main4(self):
+        """test"""
         print('main4 ========')
-        try: 
+        try:
             pgtree.main(['-h'])
         except SystemExit:
             pass
-     
+
     @patch('builtins.input')
     def test_main5(self, mock_input):
+        """test"""
         print('main5 ========')
         mock_input.return_value = 'n'
         pgtree.main(['-k','sshd'])
 
     def test_main6(self):
+        """test"""
         print('main6 ========')
         pgtree.main(['-a'])
 
