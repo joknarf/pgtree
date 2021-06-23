@@ -110,25 +110,12 @@ class Proctree:
             user = 'uid'
         else:
             user = 'user'
-        out = runcmd(['ps', '-e', '-o', 'pid,ppid,stime,'+user+',comm,args'])
+        out = runcmd(['ps', '-e', '-o', 'pid,ppid,stime,'+user+',ucomm,args'])
         ps_out = out.split('\n')
-        # cannot split as space char can occur in comm
-        # guess columns width from ps header :
-        # PID, PPID, STIME right aligned (and UID if used)
-        # '  PID  PPID STIME USER     COMMAND  COMMAND'
-        col_b = {
-            'pid': 0,
-            'ppid': ps_out[0].find('PID') + 4,
-            'stime': ps_out[0].find('PPID') + 5,
-            'user': ps_out[0].find('STIME') + 6,
-            'comm': ps_out[0].find('COMMAND'),
-        }
-        col_b['args'] = ps_out[0].find('COMMAND', col_b['comm']+1)
         for line in ps_out[1:]:
-            pid = line[0:col_b['ppid']-1].strip(' ')
+            (pid, ppid, stime, user, ucomm, args) = line.split(None, 5)
             if pid == str(os.getpid()):
                 continue
-            ppid = line[col_b['ppid']:col_b['stime']-1].strip(' ')
             if ppid == pid:
                 ppid = '-1'
             if ppid not in self.children:
@@ -136,10 +123,10 @@ class Proctree:
             self.children[ppid].append(pid)
             self.ps_info[pid] = {
                 'ppid': ppid,
-                'stime': line[col_b['stime']:col_b['user']-1].strip(' '),
-                'user': line[col_b['user']:col_b['comm']-1].strip(' '),
-                'comm': os.path.basename(line[col_b['comm']:col_b['args']-1].strip(' ')),
-                'args': line[col_b['args']:],
+                'stime': stime,
+                'user': user,
+                'comm': ucomm,
+                'args': args,
             }
 
     def get_parents(self):
