@@ -30,6 +30,7 @@ __license__ = "MIT"
 import sys
 import os
 import getopt
+import platform
 
 # pylint: disable=E0602
 # pylint: disable=E1101
@@ -106,11 +107,9 @@ class Proctree:
 
     def get_psinfo(self, use_uid):
         """parse unix ps command"""
-        if use_uid:
-            user = 'uid'
-        else:
-            user = 'user'
-        out = runcmd(['ps', '-e', '-o', 'pid,ppid,stime,'+user+',ucomm,args'])
+        user = 'uid' if use_uid else 'user'
+        ucomm = 'ucomm' if platform.system() != 'SunOS' else 'fname'
+        out = runcmd(['ps', '-e', '-o', 'pid,ppid,stime,'+user+','+ucomm+',args'])
         ps_out = out.split('\n')
         for line in ps_out[1:]:
             (pid, ppid, stime, user, ucomm, args) = line.split(None, 5)
