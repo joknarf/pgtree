@@ -108,10 +108,18 @@ class Proctree:
     def get_psinfo(self, use_uid):
         """parse unix ps command"""
         osname = platform.system()
-        r = 'r' if osname == 'AIX' else '' # use ruser ruid for AIX as user can be empty
-        user = r + 'uid' if use_uid else r + 'user'
-        stime = 'stime' if osname != 'AIX' else 'start'
-        ucomm = 'ucomm' if osname != 'SunOS' else 'fname'
+        r = ''
+        stime = 'stime'
+        ucomm = 'ucomm'
+        if osname == 'AIX': 
+            r = 'r' # use ruser ruid for AIX as user can be empty
+            stime = 'start'
+        if osname == 'SunOS':
+            ucomm = 'fname'
+        if use_uid:
+            user = r + 'uid'
+        else: 
+            user = r + 'user'
         out = runcmd(['ps', '-e', '-o', 'pid,ppid,'+stime+','+user+','+ucomm+',args'])
         ps_out = out.split('\n')
         for line in ps_out[1:]:
@@ -181,7 +189,7 @@ class Proctree:
             else:  # not last child
                 curr_p = self.treedisp.child
                 next_p = self.treedisp.notchild
-            ps_info = self.treedisp.colorize('pid', pid.ljust(5, ' ')) + \
+            ps_info = self.treedisp.colorize('pid', pid.ljust(5)) + \
                       self.treedisp.colorize('user', ' (' + self.ps_info[pid]['user'] + ') ') + \
                       self.treedisp.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ') + \
                       self.treedisp.colorize('stime', self.ps_info[pid]['stime'] + ' ') + \
