@@ -115,18 +115,17 @@ class Proctree:
             user = 'uid'
         else: 
             user = 'user'
-        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-', '-o', user+'='+20*'-', '-o', 'comm='+100*'-', '-o', 'args'])
+        # ps field header does not exceed 132 columns (bug?)
+        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-', '-o', user+'='+20*'-', '-o', 'comm='+130*'-', '-o', 'args'])
         ps_out = out.split('\n')
         for line in ps_out[1:]:
-            print(line)
+            # print(line)
             pid = line[0:20].strip()
-            print("o"+pid+"o")
             ppid = line[22:41].strip()
-            print("o"+ppid+"o")
             stime = line[41:62].strip()
             user = line[63:82].strip()
-            comm = os.path.basename(line[84:132].strip())
-            args = line[185:].strip()
+            comm = os.path.basename(line[84:214].strip())
+            args = line[215:].strip()
             if pid == str(os.getpid()):
                 continue
             if ppid == pid:
