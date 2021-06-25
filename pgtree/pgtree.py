@@ -115,8 +115,12 @@ class Proctree:
             user = 'uid'
         else: 
             user = 'user'
+        comm = 'ucomm'
+        if osname == 'Solaris':
+            comm = 'comm'
+
         # ps field header does not exceed 132 columns (bug?)
-        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-', '-o', user+'='+20*'-', '-o', 'comm='+130*'-', '-o', 'args'])
+        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-', '-o', user+'='+20*'-', '-o', comm+'='+130*'-', '-o', 'args'])
         ps_out = out.split('\n')
         for line in ps_out[1:]:
             # print(line)
