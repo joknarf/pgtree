@@ -109,23 +109,24 @@ class Proctree:
         """parse unix ps command"""
         osname = platform.system()
         stime = 'stime'
-        if osname == 'AIX': 
+        if osname == 'AIX':
             stime = 'start'
         if use_uid:
             user = 'uid'
-        else: 
+        else:
             user = 'user'
         comm = 'ucomm'
         if osname == 'SunOS':
             comm = 'comm'
 
         # ps field header does not exceed 132 columns (bug?)
-        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-', '-o', user+'='+30*'-', '-o', comm+'='+130*'-', '-o', 'args'])
+        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-',
+                      '-o', user+'='+30*'-', '-o', comm+'='+130*'-', '-o', 'args'])
         ps_out = out.split('\n')
         for line in ps_out[1:]:
             # print(line)
             pid = line[0:20].strip()
-            ppid = line[22:41].strip()
+            ppid = line[21:41].strip()
             stime = line[42:62].strip()
             user = line[63:93].strip()
             comm = os.path.basename(line[94:224].strip())
