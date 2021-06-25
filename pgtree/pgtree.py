@@ -126,8 +126,8 @@ class Proctree:
             # print(line)
             pid = line[0:20].strip()
             ppid = line[22:41].strip()
-            stime = line[41:62].strip()
-            user = line[63:92].strip()
+            stime = line[42:62].strip()
+            user = line[63:93].strip()
             comm = os.path.basename(line[94:224].strip())
             args = line[225:].strip()
             if pid == str(os.getpid()):
