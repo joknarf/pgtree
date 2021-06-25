@@ -107,11 +107,16 @@ class Proctree:
 
     def get_psinfo(self, use_uid):
         """parse unix ps command"""
-        user = 'uid' if use_uid else 'user'
-        ucomm = 'ucomm' if platform.system() != 'SunOS' else 'fname'
-        out = runcmd(['ps', '-e', '-o', 'pid,ppid,stime,'+user+','+ucomm+',args'])
+        osname = platform.system()
+        r = 'r' if osname == 'AIX' else '' # use ruser ruid for AIX as user can be empty
+        user = r + 'uid' if use_uid else r + 'user'
+        stime = 'stime' if osname != 'AIX' else 'start'
+        ucomm = 'ucomm' if osname != 'SunOS' else 'fname'
+        out = runcmd(['ps', '-e', '-o', 'pid,ppid,'+stime+','+user+','+ucomm+',args'])
         ps_out = out.split('\n')
         for line in ps_out[1:]:
+            if osname == 'AIX': # AIX start has space
+                line = line[:26] + '_' + line[27:]
             (pid, ppid, stime, user, ucomm, args) = line.split(None, 5)
             if pid == str(os.getpid()):
                 continue
