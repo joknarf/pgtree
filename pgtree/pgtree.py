@@ -30,6 +30,7 @@ __license__ = "MIT"
 import sys
 import os
 import getopt
+import platform
 
 # pylint: disable=E0602
 # pylint: disable=E1101
@@ -106,29 +107,28 @@ class Proctree:
 
     def get_psinfo(self, use_uid):
         """parse unix ps command"""
+        osname = platform.system()
+        stime = 'stime'
+        if osname == 'AIX': 
+            stime = 'start'
         if use_uid:
             user = 'uid'
-        else:
+        else: 
             user = 'user'
-        out = runcmd(['ps', '-e', '-o', 'pid,ppid,stime,'+user+',comm,args'])
+        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-', '-o', user+'='+20*'-', '-o', 'comm='+100*'-', '-o', 'args'])
         ps_out = out.split('\n')
-        # cannot split as space char can occur in comm
-        # guess columns width from ps header :
-        # PID, PPID, STIME right aligned (and UID if used)
-        # '  PID  PPID STIME USER     COMMAND  COMMAND'
-        col_b = {
-            'pid': 0,
-            'ppid': ps_out[0].find('PID') + 4,
-            'stime': ps_out[0].find('PPID') + 5,
-            'user': ps_out[0].find('STIME') + 6,
-            'comm': ps_out[0].find('COMMAND'),
-        }
-        col_b['args'] = ps_out[0].find('COMMAND', col_b['comm']+1)
         for line in ps_out[1:]:
-            pid = line[0:col_b['ppid']-1].strip(' ')
+            print(line)
+            pid = line[0:20].strip()
+            print("o"+pid+"o")
+            ppid = line[22:41].strip()
+            print("o"+ppid+"o")
+            stime = line[41:62].strip()
+            user = line[63:82].strip()
+            comm = os.path.basename(line[84:132].strip())
+            args = line[185:].strip()
             if pid == str(os.getpid()):
                 continue
-            ppid = line[col_b['ppid']:col_b['stime']-1].strip(' ')
             if ppid == pid:
                 ppid = '-1'
             if ppid not in self.children:
@@ -136,10 +136,10 @@ class Proctree:
             self.children[ppid].append(pid)
             self.ps_info[pid] = {
                 'ppid': ppid,
-                'stime': line[col_b['stime']:col_b['user']-1].strip(' '),
-                'user': line[col_b['user']:col_b['comm']-1].strip(' '),
-                'comm': os.path.basename(line[col_b['comm']:col_b['args']-1].strip(' ')),
-                'args': line[col_b['args']:],
+                'stime': stime,
+                'user': user,
+                'comm': comm,
+                'args': args,
             }
 
     def get_parents(self):
@@ -190,7 +190,7 @@ class Proctree:
             else:  # not last child
                 curr_p = self.treedisp.child
                 next_p = self.treedisp.notchild
-            ps_info = self.treedisp.colorize('pid', pid.ljust(5, ' ')) + \
+            ps_info = self.treedisp.colorize('pid', pid.ljust(5)) + \
                       self.treedisp.colorize('user', ' (' + self.ps_info[pid]['user'] + ') ') + \
                       self.treedisp.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ') + \
                       self.treedisp.colorize('stime', self.ps_info[pid]['stime'] + ' ') + \
