@@ -116,7 +116,7 @@ class Proctree:
         else: 
             user = 'user'
         comm = 'ucomm'
-        if osname == 'Solaris':
+        if osname == 'SunOS':
             comm = 'comm'
 
         # ps field header does not exceed 132 columns (bug?)
