@@ -124,7 +124,7 @@ class Proctree:
         # ps field header does not exceed 132 columns (bug?)
         cmd = ['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', user+'='+30*'-',
                '-o', stime+'='+50*'-', '-o', comm+'='+130*'-', '-o', 'args']
-        print(' '.join(cmd))
+        # print(' '.join(cmd))
         out = runcmd(cmd)
         ps_out = out.split('\n')
         for line in ps_out[1:]:
