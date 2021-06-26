@@ -14,12 +14,12 @@ class ProctreeTest(unittest.TestCase):
     def test_tree1(self, mock_runcmd, mock_kill):
         """test"""
         print("tree: =======")
-        ps_out = """  PID  PPID STIME USER     COMMAND         COMMAND
-    1     0 Aug12 root     init            /init
-   10     1 Aug12 joknarf  bash            -bash
-   20    10 10:10 joknarf  sleep           /bin/sleep 60
-   30    10 10:10 joknarf  top             /bin/top
-   40     1 11:01 root     bash            -bash"""
+        ps_out = """-------------------- -------------------- -------------------- ------------------------------ ---------------------------------------------------------------------------------------------------------------------------------- ---
+                   1                    0                Aug12 root                           init                                                                                                                               /init
+                  10                    1                Aug12 joknarf                        bash                                                                                                                               -bash
+                  20                   10                10:10 joknarf                        sleep                                                                                                                              /bin/sleep 60
+                  30                   10                10:10 joknarf                        top                                                                                                                                /bin/top
+                  40                    1                11:01 root                           bash                                                                                                                               -bash"""
         mock_runcmd.return_value = ps_out
         mock_kill.return_value = True
         ptree = pgtree.Proctree(pids=['10'])
