@@ -93,7 +93,7 @@ class Proctree:
     Proctree([ 'pid1', 'pid2' ])
     """
 
-    def __init__(self, pids=('1'), use_uid=False, use_ascii=False, use_color=False):
+    def __init__(self, pids=('1'), use_uid=False, use_ascii=False, use_color=False, psfield=None):
         """constructor"""
         self.pids = pids         # pids to display hierarchy
         self.ps_info = {}        # ps command info stored
@@ -102,15 +102,17 @@ class Proctree:
         self.pids_tree = {}
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
-        self.get_psinfo(use_uid)
+        self.get_psinfo(use_uid, psfield)
         self.build_tree()
 
-    def get_psinfo(self, use_uid):
+    def get_psinfo(self, use_uid, psfield):
         """parse unix ps command"""
         osname = platform.system()
         stime = 'stime'
         if osname == 'AIX':
             stime = 'start'
+        if psfield:
+            stime = psfield
         if use_uid:
             user = 'uid'
         else:
@@ -120,17 +122,19 @@ class Proctree:
             comm = 'comm'
 
         # ps field header does not exceed 132 columns (bug?)
-        out = runcmd(['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', stime+'='+20*'-',
-                      '-o', user+'='+30*'-', '-o', comm+'='+130*'-', '-o', 'args'])
+        cmd = ['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', user+'='+30*'-',
+               '-o', stime+'='+50*'-', '-o', comm+'='+130*'-', '-o', 'args']
+        print(' '.join(cmd))
+        out = runcmd(cmd)
         ps_out = out.split('\n')
         for line in ps_out[1:]:
             # print(line)
             pid = line[0:20].strip()
             ppid = line[21:41].strip()
-            stime = line[42:62].strip()
-            user = line[63:93].strip()
-            comm = os.path.basename(line[94:224].strip())
-            args = line[225:].strip()
+            user = line[42:72].strip()
+            stime = line[73:123].strip()
+            comm = os.path.basename(line[124:254].strip())
+            args = line[255:].strip()
             if pid == str(os.getpid()):
                 continue
             if ppid == pid:
@@ -241,7 +245,7 @@ class Proctree:
 def main(argv):
     """pgtree command line"""
     usage = """
-    usage: pgtree.py [-ICya] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-ICya] [-O <psfield>] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -251,6 +255,8 @@ def main(argv):
     -y : do not ask for confirmation to kill
     -C : no color (default colored output on tty)
     -a : use ascii characters
+    -O <psfield> : display <psfield> instead of 'stime' in output
+                   <psfield> must be valid with ps -o <psfield> command
 
     by default display full process hierarchy (parents + children of selected processes)
 
@@ -266,7 +272,7 @@ def main(argv):
 
     try:
         opts, args = getopt.getopt(argv,
-                                   "ICckKfxvinoyap:u:U:g:G:P:s:t:F:",
+                                   "ICckKfxvinoyap:u:U:g:G:P:s:t:F:O:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
@@ -276,6 +282,7 @@ def main(argv):
     pgrep_args = []
     found = ('1')
     options = {}
+    psfield = None
     for opt, arg in opts:
         options[opt] = arg
         if opt == "-k":
@@ -284,6 +291,8 @@ def main(argv):
             sig = 9
         elif opt == "-p":
             found = arg.split(',')
+        elif opt == "-O":
+            psfield = arg
         elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
             pgrep_args.append(opt)
         elif opt in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
@@ -301,7 +310,7 @@ def main(argv):
         after = ''
     ptree = Proctree(pids=found, use_uid='-I' in options,
                      use_ascii='-a' in options,
-                     use_color='-C' not in options)
+                     use_color='-C' not in options,psfield=psfield)
     ptree.print_tree(child_only='-c' in options, sig=sig,
                      confirmed='-y' in options)
     sys.stdout.write(after)
