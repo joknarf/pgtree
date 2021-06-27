@@ -110,7 +110,7 @@ class Proctree:
         """parse unix ps command"""
         osname = platform.system()
         stime = 'stime'
-        if osname == 'AIX':
+        if osname in ['AIX', 'Darwin']:
             stime = 'start'
         if psfield:
             stime = psfield
