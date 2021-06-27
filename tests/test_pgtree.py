@@ -120,5 +120,10 @@ class ProctreeTest(unittest.TestCase):
         print('main6 ========')
         pgtree.main(['-a'])
 
+    def test_main7(self):
+        """test"""
+        print('main6 ========')
+        pgtree.main(['-O', '%cpu', 'bash'])
+
 if __name__ == "__main__":
     unittest.main(failfast=True)
