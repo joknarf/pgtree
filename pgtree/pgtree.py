@@ -93,6 +93,7 @@ class Proctree:
     Proctree([ 'pid1', 'pid2' ])
     """
 
+    # pylint: disable=R0913
     def __init__(self, pids=('1'), use_uid=False, use_ascii=False, use_color=False, psfield=None):
         """constructor"""
         self.pids = pids         # pids to display hierarchy
@@ -310,7 +311,7 @@ def main(argv):
         after = ''
     ptree = Proctree(pids=found, use_uid='-I' in options,
                      use_ascii='-a' in options,
-                     use_color='-C' not in options,psfield=psfield)
+                     use_color='-C' not in options, psfield=psfield)
     ptree.print_tree(child_only='-c' in options, sig=sig,
                      confirmed='-y' in options)
     sys.stdout.write(after)
