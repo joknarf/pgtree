@@ -14,12 +14,12 @@ class ProctreeTest(unittest.TestCase):
     def test_tree1(self, mock_runcmd, mock_kill):
         """test"""
         print("tree: =======")
-        ps_out = """-------------------- -------------------- -------------------- ------------------------------ ---------------------------------------------------------------------------------------------------------------------------------- ---
-                   1                    0                Aug12 root                           init                                                                                                                               /init
-                  10                    1                Aug12 joknarf                        bash                                                                                                                               -bash
-                  20                   10                10:10 joknarf                        sleep                                                                                                                              /bin/sleep 60
-                  30                   10                10:10 joknarf                        top                                                                                                                                /bin/top
-                  40                    1                11:01 root                           bash                                                                                                                               -bash"""
+        ps_out = """-------------------- -------------------- ------------------------------ -------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------- ---
+                   1                    0 root                                                                        Aug12 init                                                                                                                               /init
+                  10                    1 joknarf                                                                     Aug12 bash                                                                                                                               -bash
+                  20                   10 joknarf                                                                     10:10 sleep                                                                                                                              /bin/sleep 60
+                  30                   10 joknarf                                                                     10:10 top                                                                                                                                /bin/top
+                  40                    1 root                                                                        11:01 bash                                                                                                                               -bash"""
         mock_runcmd.return_value = ps_out
         mock_kill.return_value = True
         ptree = pgtree.Proctree(pids=['10'])
@@ -75,6 +75,7 @@ class ProctreeTest(unittest.TestCase):
         print(ptree.pids_tree)
         ptree.print_tree(True)
         self.assertEqual(ptree.children, children)
+        self.maxDiff =  None
         self.assertEqual(ptree.ps_info, ps_info)
         self.assertEqual(ptree.pids_tree, pids_tree)
         self.assertEqual(ptree.selected_pids, selected_pids)
@@ -118,6 +119,11 @@ class ProctreeTest(unittest.TestCase):
         """test"""
         print('main6 ========')
         pgtree.main(['-a'])
+
+    def test_main7(self):
+        """test"""
+        print('main6 ========')
+        pgtree.main(['-O', '%cpu', 'bash'])
 
 if __name__ == "__main__":
     unittest.main(failfast=True)
