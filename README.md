@@ -20,11 +20,12 @@ Should work on any Unix that can execute :
 # /usr/bin/pgrep 
 # /usr/bin/ps -e -o pid,ppid,stime,user,ucomm,args
 ```
-_Tested on various versions of RedHat / CentOS / Ubuntu / Suse / MacOS / Solaris including old versions_
+
+if `pgrep` command not available (AIX), pgtree uses built-in pgrep (`-f -i -x -u <user>` supported).
+
+_Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse / MacOS / Solaris / AIX including old versions_
 
 _(uses -o comm on Solaris)_
-
-_no pgrep on AIX_
 
 ## Installation
 FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
