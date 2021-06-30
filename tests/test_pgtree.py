@@ -22,7 +22,7 @@ class ProctreeTest(unittest.TestCase):
                   40                    1 root                                                                        11:01 bash                                                                                                                               -bash"""
         mock_runcmd.return_value = ps_out
         mock_kill.return_value = True
-        ptree = pgtree.Proctree(pids=['10'])
+        ptree = pgtree.Proctree()
 
         children = {
                 '0': ['1'],
@@ -72,14 +72,14 @@ class ProctreeTest(unittest.TestCase):
                 '0': ['1'],
         }
         selected_pids = [ '30', '20', '10' ]
+        ptree.print_tree(pids=['10'], child_only=True)
         print(ptree.pids_tree)
-        ptree.print_tree(True)
         self.assertEqual(ptree.children, children)
         self.maxDiff =  None
         self.assertEqual(ptree.ps_info, ps_info)
         self.assertEqual(ptree.pids_tree, pids_tree)
         self.assertEqual(ptree.selected_pids, selected_pids)
-        ptree.print_tree(True, sig=15, confirmed=True)
+        ptree.print_tree(pids=['10'], child_only=True, sig=15, confirmed=True)
 
     def test_main(self):
         """test"""
