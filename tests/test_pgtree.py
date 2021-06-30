@@ -25,57 +25,57 @@ class ProctreeTest(unittest.TestCase):
         ptree = pgtree.Proctree()
 
         children = {
-                '0': ['1'],
-                '1': ['10','40'],
-                '10': ['20','30'],
+            '0': ['1'],
+            '1': ['10', '40'],
+            '10': ['20', '30'],
         }
         ps_info = {
-                '1': {
-                    'ppid': '0',
-                    'stime': 'Aug12',
-                    'user': 'root',
-                    'comm': 'init',
-                    'args': '/init',
-                },
-                '10': {
-                    'ppid': '1',
-                    'stime': 'Aug12',
-                    'user': 'joknarf',
-                    'comm': 'bash',
-                    'args': '-bash',
-                },
-                '20': {
-                    'ppid': '10',
-                    'stime': '10:10',
-                    'user': 'joknarf',
-                    'comm': 'sleep',
-                    'args': '/bin/sleep 60',
-                },
-                '30': {
-                    'ppid': '10',
-                    'stime': '10:10',
-                    'user': 'joknarf',
-                    'comm': 'top',
-                    'args': '/bin/top',
-                },
-                '40': {
-                    'ppid': '1',
-                    'stime': '11:01',
-                    'user': 'root',
-                    'comm': 'bash',
-                    'args': '-bash',
-                },
+            '1': {
+                'ppid': '0',
+                'stime': 'Aug12',
+                'user': 'root',
+                'comm': 'init',
+                'args': '/init',
+            },
+            '10': {
+                'ppid': '1',
+                'stime': 'Aug12',
+                'user': 'joknarf',
+                'comm': 'bash',
+                'args': '-bash',
+            },
+            '20': {
+                'ppid': '10',
+                'stime': '10:10',
+                'user': 'joknarf',
+                'comm': 'sleep',
+                'args': '/bin/sleep 60',
+            },
+            '30': {
+                'ppid': '10',
+                'stime': '10:10',
+                'user': 'joknarf',
+                'comm': 'top',
+                'args': '/bin/top',
+            },
+            '40': {
+                'ppid': '1',
+                'stime': '11:01',
+                'user': 'root',
+                'comm': 'bash',
+                'args': '-bash',
+            },
         }
         pids_tree = {
-                '10': ['20', '30'],
-                '1': ['10'],
-                '0': ['1'],
+            '10': ['20', '30'],
+            '1': ['10'],
+            '0': ['1'],
         }
-        selected_pids = [ '30', '20', '10' ]
+        selected_pids = ['30', '20', '10']
         ptree.print_tree(pids=['10'], child_only=True)
         print(ptree.pids_tree)
         self.assertEqual(ptree.children, children)
-        self.maxDiff =  None
+        self.maxDiff = None
         self.assertEqual(ptree.ps_info, ps_info)
         self.assertEqual(ptree.pids_tree, pids_tree)
         self.assertEqual(ptree.selected_pids, selected_pids)
@@ -97,8 +97,8 @@ class ProctreeTest(unittest.TestCase):
         """test"""
         print('main3 ========')
         mock_kill.return_value = True
-        pgtree.main(['-k','-p','1111'])
-        pgtree.main(['-K','-p','1111'])
+        pgtree.main(['-k', '-p', '1111'])
+        pgtree.main(['-K', '-p', '1111'])
 
     def test_main4(self):
         """test"""
@@ -113,7 +113,7 @@ class ProctreeTest(unittest.TestCase):
         """test"""
         print('main5 ========')
         mock_input.return_value = 'n'
-        pgtree.main(['-k','sshd'])
+        pgtree.main(['-k', 'sshd'])
 
     def test_main6(self):
         """test"""
@@ -122,8 +122,25 @@ class ProctreeTest(unittest.TestCase):
 
     def test_main7(self):
         """test"""
-        print('main6 ========')
+        print('main7 ========')
         pgtree.main(['-O', '%cpu', 'bash'])
+
+    @patch('distutils.spawn.find_executable')
+    def test_pgrep(self, mock_find_executable):
+        """pgrep built-in"""
+        print("test pgrep built-in")
+        mock_find_executable.return_value = False
+        try:
+            pgtree.main(['-t', 'pts/1'])
+        except SystemExit:
+            pass
+        pgtree.main(['-f', '-i', '-u', 'root', '-x', '/sbin/init'])
+
+    def test_ospgrep(self):
+        """pgrep os"""
+        print("test os pgrep")
+        pgtree.main(['-f', '-i', '-u', 'root', '-x', '-t', 'pts/1', 'bash'])
+
 
 if __name__ == "__main__":
     unittest.main(failfast=True)
