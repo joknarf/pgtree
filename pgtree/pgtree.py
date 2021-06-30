@@ -31,6 +31,8 @@ import sys
 import os
 import getopt
 import platform
+import distutils.spawn
+import re
 
 # pylint: disable=E0602
 # pylint: disable=E1101
@@ -94,9 +96,9 @@ class Proctree:
     """
 
     # pylint: disable=R0913
-    def __init__(self, pids=('1'), use_uid=False, use_ascii=False, use_color=False, psfield=None):
+    def __init__(self, use_uid=False, use_ascii=False, use_color=False, psfield=None):
         """constructor"""
-        self.pids = pids         # pids to display hierarchy
+        self.pids = ('1')
         self.ps_info = {}        # ps command info stored
         self.children = {}       # children of pid
         self.selected_pids = []  # pids and their children
@@ -104,7 +106,6 @@ class Proctree:
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
         self.get_psinfo(use_uid, psfield)
-        self.build_tree()
 
     def get_psinfo(self, use_uid, psfield):
         """parse unix ps command"""
@@ -150,6 +151,45 @@ class Proctree:
                 'comm': comm,
                 'args': args,
             }
+
+    def pgrep(self, argv):
+        """mini built-in pgrep if pgrep command not available
+           [-f] [-x] [-i] [-u <user>] [pattern]"""
+        if distutils.spawn.find_executable("pgrep"):
+            pgrep = runcmd(['pgrep'] + argv)
+            return pgrep.split("\n")
+
+        try:
+            opts, args = getopt.getopt(argv, "ifxu:")
+        except getopt.GetoptError:
+            print("bad pgrep parameters")
+            sys.exit(2)
+        psfield = "comm"
+        flag = 0
+        exact = False
+        user = ".*"
+        pattern = ".*"
+        for opt, arg in opts:
+            if opt == "-f":
+                psfield = "args"
+            elif opt == "-i":
+                flag = re.IGNORECASE
+            elif opt == "-x":
+                exact = True
+            elif opt == "-u":
+                user = arg
+
+        if args:
+            pattern = args[0]
+        if exact:
+            pattern = "^" + pattern + "$"
+        pids = []
+        for pid in self.ps_info:
+            if re.search(pattern, self.ps_info[pid][psfield], flag) and \
+               re.match(user, self.ps_info[pid]["user"]):
+                pids.append(pid)
+        return pids
+
 
     def get_parents(self):
         """get parents list of pids"""
@@ -216,8 +256,10 @@ class Proctree:
             if pid in self.pids_tree:
                 self._print_tree(self.pids_tree[pid], print_children, pre+next_p)
 
-    def print_tree(self, child_only, sig=0, confirmed=False):
+    def print_tree(self, pids=('1'), child_only=False, sig=0, confirmed=False):
         """display full or children only process tree"""
+        self.pids = pids
+        self.build_tree()
         if sig:
             self.kill_with_children(sig=sig, confirmed=confirmed)
         else:
@@ -299,9 +341,6 @@ def main(argv):
         elif opt in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
             pgrep_args += [opt, arg]
     pgrep_args += args
-    if pgrep_args:
-        pgrep = runcmd(['/usr/bin/pgrep'] + pgrep_args)
-        found = pgrep.split("\n")
     # truncate lines if tty output / disable color if not tty
     if sys.stdout.isatty():
         sys.stdout.write("\x1b[?7l")  # rmam
@@ -309,10 +348,14 @@ def main(argv):
     else:
         options['-C'] = ''
         after = ''
-    ptree = Proctree(pids=found, use_uid='-I' in options,
+
+    ptree = Proctree(use_uid='-I' in options,
                      use_ascii='-a' in options,
                      use_color='-C' not in options, psfield=psfield)
-    ptree.print_tree(child_only='-c' in options, sig=sig,
+
+    if pgrep_args:
+        found = ptree.pgrep(pgrep_args)
+    ptree.print_tree(pids=found, child_only='-c' in options, sig=sig,
                      confirmed='-y' in options)
     sys.stdout.write(after)
 
