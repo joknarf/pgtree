@@ -288,7 +288,7 @@ class Proctree:
 def main(argv):
     """pgtree command line"""
     usage = """
-    usage: pgtree.py [-ICya] [-O <psfield>] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -296,7 +296,7 @@ def main(argv):
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
     -y : do not ask for confirmation to kill
-    -C : no color (default colored output on tty)
+    -C : color preference : always / never / auto
     -a : use ascii characters
     -O <psfield> : display <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
@@ -315,7 +315,7 @@ def main(argv):
 
     try:
         opts, args = getopt.getopt(argv,
-                                   "ICckKfxvinoyap:u:U:g:G:P:s:t:F:O:",
+                                   "IC:ckKfxvinoyap:u:U:g:G:P:s:t:F:O:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
@@ -326,6 +326,7 @@ def main(argv):
     found = ('1')
     options = {}
     psfield = None
+    options['-C'] = 'auto'
     for opt, arg in opts:
         options[opt] = arg
         if opt == "-k":
@@ -341,17 +342,18 @@ def main(argv):
         elif opt in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
             pgrep_args += [opt, arg]
     pgrep_args += args
+
     # truncate lines if tty output / disable color if not tty
     if sys.stdout.isatty():
         sys.stdout.write("\x1b[?7l")  # rmam
         after = "\x1b[?7h"            # smam
+        options['-C'] = 'always' if options['-C'] == 'auto' else options['-C']
     else:
-        options['-C'] = ''
         after = ''
 
     ptree = Proctree(use_uid='-I' in options,
                      use_ascii='-a' in options,
-                     use_color='-C' not in options, psfield=psfield)
+                     use_color=options['-C'] == 'always', psfield=psfield)
 
     if pgrep_args:
         found = ptree.pgrep(pgrep_args)
