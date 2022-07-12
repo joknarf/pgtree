@@ -58,7 +58,8 @@ def ask(prompt):
 # pylint: disable=R0903
 class Treedisplay:
     """Tree display attributes"""
-    COLOR_FG = "\x1b[38;5;"
+    #COLOR_FG = "\x1b[38;5;"  # 256 colors
+    COLOR_FG = "\x1b[01;"    # 16 colors more compatible
     COLOR_RESET = "\x1b[0m"
 
     def __init__(self, use_ascii=False, use_color=False):
@@ -76,10 +77,10 @@ class Treedisplay:
         self.colors = {}
         if use_color:
             self.colors = {
-                'pid': '12',
-                'user': '3',
-                'comm': '2',
-                'stime': '8',
+                'pid': '34',   # 12
+                'user': '33',  # 3
+                'comm': '32',  # 2
+                'stime': '36', # 8
             }
 
     def colorize(self, field, value):
