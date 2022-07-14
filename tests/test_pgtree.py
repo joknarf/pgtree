@@ -134,12 +134,12 @@ class ProctreeTest(unittest.TestCase):
             pgtree.main(['-t', 'pts/1'])
         except SystemExit:
             pass
-        pgtree.main(['-f', '-i', '-u', 'root', '-x', '/sbin/init'])
+        pgtree.main(['-I','-C','n','-w','n','-f', '-i', '-u', 'root', '-x', '/sbin/init'])
 
     def test_ospgrep(self):
         """pgrep os"""
         print("test os pgrep")
-        pgtree.main(['-f', '-i', '-u', 'root', '-x', '-t', 'pts/1', 'bash'])
+        pgtree.main(['-C','y','-w','n','-f', '-i', '-u', 'root', '-x', '-t', 'pts/1', 'bash'])
 
 
 if __name__ == "__main__":

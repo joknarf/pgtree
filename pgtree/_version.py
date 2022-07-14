@@ -7,5 +7,5 @@ Provides pgtree version information.
 
 from incremental import Version
 
-__version__ = Version("pgtree", 1, 0, 15)
+__version__ = Version("pgtree", 1, 0, 16)
 __all__ = ["__version__"]

@@ -58,7 +58,8 @@ def ask(prompt):
 # pylint: disable=R0903
 class Treedisplay:
     """Tree display attributes"""
-    COLOR_FG = "\x1b[38;5;"
+    #COLOR_FG = "\x1b[38;5;"  # 256 colors
+    COLOR_FG = "\x1b[01;"    # 16 colors more compatible
     COLOR_RESET = "\x1b[0m"
 
     def __init__(self, use_ascii=False, use_color=False):
@@ -76,10 +77,10 @@ class Treedisplay:
         self.colors = {}
         if use_color:
             self.colors = {
-                'pid': '12',
-                'user': '3',
-                'comm': '2',
-                'stime': '8',
+                'pid': '34',   # 12
+                'user': '33',  # 3
+                'comm': '32',  # 2
+                'stime': '36', # 8
             }
 
     def colorize(self, field, value):
@@ -284,6 +285,31 @@ class Proctree:
                 print('kill ' + pid + ': Permission error')
                 continue
 
+def colored(opt):
+    """colored output or not"""
+    if opt in ('y', 'yes', 'always'):
+        opt = True
+    elif opt in ('n', 'no', 'never'):
+        opt = False
+
+    # truncate lines if tty output / disable color if not tty
+    if sys.stdout.isatty():
+        opt = True if opt == 'auto' else opt
+    return opt
+
+def wrap_text(opt):
+    """wrap/nowrap text on tty (default wrap with tty)"""
+    if opt in ('y', 'yes'):
+        opt = True
+    elif opt in ('n', 'no'):
+        opt = False
+
+    if sys.stdout.isatty() and opt:
+        sys.stdout.write("\x1b[?7l")  # rmam
+        after = "\x1b[?7h"            # smam
+    else:
+        after = ''
+    return after
 
 def main(argv):
     """pgtree command line"""
@@ -296,7 +322,8 @@ def main(argv):
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
     -y : do not ask for confirmation to kill
-    -C : color preference : always / never / auto
+    -C : color preference : y/yes/always or n/no/never (default auto)
+    -w : tty wrap text : y/yes or n/no (default y)
     -a : use ascii characters
     -O <psfield> : display <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
@@ -315,7 +342,7 @@ def main(argv):
 
     try:
         opts, args = getopt.getopt(argv,
-                                   "IC:ckKfxvinoyap:u:U:g:G:P:s:t:F:O:",
+                                   "IckKfxvinoyap:u:U:g:G:P:s:t:F:O:C:w:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
@@ -327,6 +354,7 @@ def main(argv):
     options = {}
     psfield = None
     options['-C'] = 'auto'
+    options['-w'] = 'yes'
     for opt, arg in opts:
         options[opt] = arg
         if opt == "-k":
@@ -343,17 +371,11 @@ def main(argv):
             pgrep_args += [opt, arg]
     pgrep_args += args
 
-    # truncate lines if tty output / disable color if not tty
-    if sys.stdout.isatty():
-        sys.stdout.write("\x1b[?7l")  # rmam
-        after = "\x1b[?7h"            # smam
-        options['-C'] = 'always' if options['-C'] == 'auto' else options['-C']
-    else:
-        after = ''
+    after = wrap_text(options['-w'])
 
     ptree = Proctree(use_uid='-I' in options,
                      use_ascii='-a' in options,
-                     use_color=options['-C'] == 'always', psfield=psfield)
+                     use_color=colored(options['-C']), psfield=psfield)
 
     if pgrep_args:
         found = ptree.pgrep(pgrep_args)
