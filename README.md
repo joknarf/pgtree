@@ -53,7 +53,8 @@ installation using setup.py, user install in `~/.local/bin`:
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
     -y : do not ask for confirmation to kill
-    -C : color preference : always / never / auto
+    -C : color preference : y/yes/always or n/no/never (default auto)
+    -w : tty wrap text : y/yes or n/no (default y)
     -a : use ascii characters
     -O <psfield> : display <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
