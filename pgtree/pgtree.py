@@ -291,10 +291,8 @@ def colored(opt):
         opt = True
     elif opt in ('n', 'no', 'never'):
         opt = False
-
-    # truncate lines if tty output / disable color if not tty
-    if sys.stdout.isatty():
-        opt = True if opt == 'auto' else opt
+    elif opt == 'auto':
+        opt = sys.stdout.isatty()
     return opt
 
 def wrap_text(opt):
