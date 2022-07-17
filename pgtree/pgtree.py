@@ -1,5 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env bash
 # coding: utf-8
+# pylint: disable=C0326,C0114,C0413
+# determine available python executable
+_=''''
+export PGT_PGREP=$(type -p pgrep)
+python=$(type -p python || type -p python3 || type -p python2)
+[ "$python" ] && exec $python "$0" "$@"
+echo "ERROR: cannot find python interpreter" >&2
+exit 1
+'''
+# pylint: enable=C0326
 """
 Program for showing the hierarchy of specific processes on a Unix computer.
 Like pstree but with searching for specific processes with pgrep first and display
@@ -31,7 +41,6 @@ import sys
 import os
 import getopt
 import platform
-import distutils.spawn
 import re
 
 # pylint: disable=E0602
@@ -156,7 +165,7 @@ class Proctree:
     def pgrep(self, argv):
         """mini built-in pgrep if pgrep command not available
            [-f] [-x] [-i] [-u <user>] [pattern]"""
-        if distutils.spawn.find_executable("pgrep"):
+        if not "PGT_PGREP" in os.environ or os.environ["PGT_PGREP"]:
             pgrep = runcmd(['pgrep'] + argv)
             return pgrep.split("\n")
 

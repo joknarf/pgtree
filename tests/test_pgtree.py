@@ -125,21 +125,20 @@ class ProctreeTest(unittest.TestCase):
         print('main7 ========')
         pgtree.main(['-O', '%cpu', 'bash'])
 
-    @patch('distutils.spawn.find_executable')
-    def test_pgrep(self, mock_find_executable):
+    def test_ospgrep(self):
+        """pgrep os"""
+        print("test os pgrep")
+        pgtree.main(['-C','y','-w','n','-f', '-i', '-u', 'root', '-x', '-t', 'pts/1', 'bash'])
+
+    @patch.dict(os.environ, {"PGT_PGREP": ""})
+    def test_pgrep(self):
         """pgrep built-in"""
         print("test pgrep built-in")
-        mock_find_executable.return_value = False
         try:
             pgtree.main(['-t', 'pts/1'])
         except SystemExit:
             pass
         pgtree.main(['-I','-C','n','-w','n','-f', '-i', '-u', 'root', '-x', '/sbin/init'])
-
-    def test_ospgrep(self):
-        """pgrep os"""
-        print("test os pgrep")
-        pgtree.main(['-C','y','-w','n','-f', '-i', '-u', 'root', '-x', '-t', 'pts/1', 'bash'])
 
 
 if __name__ == "__main__":
