@@ -194,9 +194,9 @@ class Proctree:
         if exact:
             pattern = "^" + pattern + "$"
         pids = []
-        for pid in self.ps_info:
-            if re.search(pattern, self.ps_info[pid][psfield], flag) and \
-               re.match(user, self.ps_info[pid]["user"]):
+        for pid,info in self.ps_info.items():
+            if re.search(pattern, info[psfield], flag) and \
+               re.match(user, info["user"]):
                 pids.append(pid)
         return pids
 
