@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # coding: utf-8
-# pylint: disable=C0326,C0114,C0413
+# pylint: disable=C0114,C0413
 # determine available python executable
 _=''''
 export PGT_PGREP=$(type -p pgrep)
@@ -9,7 +9,7 @@ python=$(type -p python || type -p python3 || type -p python2)
 echo "ERROR: cannot find python interpreter" >&2
 exit 1
 '''
-# pylint: enable=C0326
+
 """
 Program for showing the hierarchy of specific processes on a Unix computer.
 Like pstree but with searching for specific processes with pgrep first and display
