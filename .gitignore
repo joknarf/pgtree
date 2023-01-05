@@ -1,5 +1,4 @@
 .eggs
-.vscode
 build
 dist
 pgtree.egg-info
