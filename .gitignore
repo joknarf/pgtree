@@ -1,0 +1,7 @@
+.eggs
+.vscode
+build
+dist
+pgtree.egg-info
+__pycache__
+*.pyc
