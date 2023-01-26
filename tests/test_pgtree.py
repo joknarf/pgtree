@@ -25,11 +25,19 @@ class ProctreeTest(unittest.TestCase):
         ptree = pgtree.Proctree()
 
         children = {
+            '-1': ['0'],
             '0': ['1'],
             '1': ['10', '40'],
             '10': ['20', '30'],
         }
         ps_info = {
+            '0': {
+                'ppid': '-1',
+                'stime': 'stime',
+                'user': 'user',
+                'comm': 'ucomm',
+                'args': 'args',
+            },
             '1': {
                 'ppid': '0',
                 'stime': 'Aug12',
@@ -70,6 +78,7 @@ class ProctreeTest(unittest.TestCase):
             '10': ['20', '30'],
             '1': ['10'],
             '0': ['1'],
+            '-1': ['0'],
         }
         selected_pids = ['30', '20', '10']
         ptree.print_tree(pids=['10'], child_only=True)

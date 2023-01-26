@@ -139,7 +139,8 @@ class Proctree:
         # print(' '.join(cmd))
         out = runcmd(cmd)
         ps_out = out.split('\n')
-        for line in ps_out[1:]:
+        ps_out[0] = f'{"0":20s} {"0":20s} {user:30s} {stime:50s} {comm:130s} args'
+        for line in ps_out:
             # print(line)
             pid = line[0:20].strip()
             ppid = line[21:41].strip()
@@ -266,9 +267,9 @@ class Proctree:
             if pid in self.pids_tree:
                 self._print_tree(self.pids_tree[pid], print_children, pre+next_p)
 
-    def print_tree(self, pids=('1'), child_only=False, sig=0, confirmed=False):
+    def print_tree(self, pids=None, child_only=False, sig=0, confirmed=False):
         """display full or children only process tree"""
-        self.pids = pids
+        self.pids = pids or '0' if '0' in self.children else '1'
         self.build_tree()
         if sig:
             self.kill_with_children(sig=sig, confirmed=confirmed)
@@ -321,7 +322,7 @@ def wrap_text(opt):
 def main(argv):
     """pgtree command line"""
     usage = """
-    usage: pgtree.py [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -337,7 +338,8 @@ def main(argv):
 
     by default display full process hierarchy (parents + children of selected processes)
 
-    -p <pids> : select processes pids to display hierarchy (default 1)
+    -p <pids> : select processes pids to display hierarchy (default 0)
+    -1 : display hierachy children of pid 1 (not including pid 0)
     <pgrep args> : use pgrep to select processes (see pgrep -h)
 
     found pids are prefixed with ►     
@@ -349,7 +351,7 @@ def main(argv):
 
     try:
         opts, args = getopt.getopt(argv,
-                                   "IckKfxvinoyap:u:U:g:G:P:s:t:F:O:C:w:",
+                                   "1IckKfxvinoyap:u:U:g:G:P:s:t:F:O:C:w:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
@@ -357,7 +359,7 @@ def main(argv):
 
     sig = 0
     pgrep_args = []
-    found = ('1')
+    found = None
     options = {}
     psfield = None
     options['-C'] = 'auto'
@@ -370,6 +372,9 @@ def main(argv):
             sig = 9
         elif opt == "-p":
             found = arg.split(',')
+        elif opt == "-1":
+            found = "1"
+            options["-c"] = True
         elif opt == "-O":
             psfield = arg
         elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
