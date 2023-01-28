@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # coding: utf-8
-# pylint: disable=C0114,C0413
+# pylint: disable=C0114,C0413,R0902
 # determine available python executable
 _=''''
 export PGT_PGREP=$(type -p pgrep)
@@ -83,20 +83,25 @@ class Treedisplay:
             self.child = '├─'
             self.notchild = '│ '
             self.lastchild = '└─'
-        self.colors = {}
-        if use_color:
-            self.colors = {
-                'pid': '34',   # 12
-                'user': '33',  # 3
-                'comm': '32',  # 2
-                'stime': '36', # 8
-            }
+        self.use_color = use_color
+        self.colors = {
+            'pid': '34',   # 12
+            'user': '33',  # 3
+            'comm': '32',  # 2
+            '%cpu': '31',
+            'vsz': '35',
+            '%mem': '35',
+            'time': '35',
+            'default': '36', # 8
+        }
 
     def colorize(self, field, value):
         """colorize fields"""
+        if not self.use_color:
+            return value
         if field in self.colors:
             return self.COLOR_FG + self.colors[field] + "m" + value + self.COLOR_RESET
-        return value
+        return self.colorize('default', value)
 
 
 class Proctree:
@@ -116,53 +121,41 @@ class Proctree:
         self.pids_tree = {}
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
-        self.get_psinfo(use_uid, psfield, pid_zero)
+        self.ps_fields = psfield.split(',') if psfield else None
+        self.get_psinfo(use_uid, pid_zero)
 
-    def get_psinfo(self, use_uid, psfield, pid_zero):
+    def get_psinfo(self, use_uid, pid_zero):
         """parse unix ps command"""
         osname = platform.system()
-        stime = 'stime'
-        if osname in ['AIX', 'Darwin']:
-            stime = 'start'
-        if psfield:
-            stime = psfield
-        if use_uid:
-            user = 'uid'
-        else:
-            user = 'user'
-        comm = 'ucomm'
-        if osname == 'SunOS':
-            comm = 'comm'
-
-        # ps field header does not exceed 132 columns (bug?)
-        cmd = ['ps', '-e', '-o', 'pid='+20*'-', '-o', 'ppid='+20*'-', '-o', user+'='+30*'-',
-               '-o', stime+'='+50*'-', '-o', comm+'='+130*'-', '-o', 'args']
-        # print(' '.join(cmd))
-        out = runcmd(cmd)
-        ps_out = out.split('\n')
-        ps_out[0] = f'{"0":20s} {"0":20s} {user:30s} {stime:50s} {comm:130s} args'
+        if not self.ps_fields:
+            self.ps_fields = ['start'] if osname in ['AIX', 'Darwin'] else ['stime']
+        user = 'uid' if use_uid else 'user'
+        comm = 'comm' if osname == 'SunOS' else 'ucomm'
+        ps_opts = ['pid', 'ppid', user] + self.ps_fields + [comm]
+        ps_cmd = 'ps -e ' + ' '.join([f'-o {opt}=' + 130*'-' for opt in ps_opts]) + ' -o args'
+        # print(ps)
+        ps_out = runcmd(ps_cmd.split(' ')).split('\n')
+        ps_opts += ['args']
+        pid_z = ["0", "0"] + ps_opts[2:] + ['args']
+        ps_out[0] = ' '.join([f'{{{i}:<130}}' for i,opt in enumerate(ps_opts)]).format(*pid_z)
+        ps_opts = ['pid', 'ppid', 'user'] + self.ps_fields + ['comm', 'args']
+        # print(ps_out[0])
         for line in ps_out:
             # print(line)
-            pid = line[0:20].strip()
-            ppid = line[21:41].strip()
-            user = line[42:72].strip()
-            stime = line[73:123].strip()
-            comm = os.path.basename(line[124:254].strip())
-            args = line[255:].strip()
+            infos = {v:line[i*131:min(i*131+130, len(line))].strip() for i,v in enumerate(ps_opts)}
+            # print(infos)
+            infos['comm'] = os.path.basename(infos['comm'])
+            pid = infos['pid']
+            ppid = infos['ppid']
             if pid == str(os.getpid()):
                 continue
             if ppid == pid:
                 ppid = '-1'
+                infos['ppid'] = '-1'
             if ppid not in self.children:
                 self.children[ppid] = []
             self.children[ppid].append(pid)
-            self.ps_info[pid] = {
-                'ppid': ppid,
-                'stime': stime,
-                'user': user,
-                'comm': comm,
-                'args': args,
-            }
+            self.ps_info[pid] = infos
         if not pid_zero:
             del self.ps_info['0']
             del self.children['0']
@@ -170,7 +163,7 @@ class Proctree:
     def pgrep(self, argv):
         """mini built-in pgrep if pgrep command not available
            [-f] [-x] [-i] [-u <user>] [pattern]"""
-        if not "PGT_PGREP" in os.environ or os.environ["PGT_PGREP"]:
+        if "PGT_GREP" not in os.environ or os.environ["PGT_PGREP"]:
             pgrep = runcmd(['pgrep'] + argv)
             return pgrep.split("\n")
 
@@ -258,9 +251,10 @@ class Proctree:
                 next_p = self.treedisp.notchild
             ps_info = self.treedisp.colorize('pid', pid.ljust(5)) + \
                       self.treedisp.colorize('user', ' (' + self.ps_info[pid]['user'] + ') ') + \
-                      self.treedisp.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ') + \
-                      self.treedisp.colorize('stime', self.ps_info[pid]['stime'] + ' ') + \
-                      self.ps_info[pid]['args']
+                      self.treedisp.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ')
+            ps_info += ' '.join(
+                        [self.treedisp.colorize(f, self.ps_info[pid][f]) for f in self.ps_fields])
+            ps_info += ' ' + self.ps_info[pid]['args']
             output = ppre + curr_p + ps_info
             print(output)
         return (next_p, print_it)
@@ -354,7 +348,8 @@ def main(argv):
     # allow options after pattern : pgtree mysearch -fc
     if len(argv) > 1 and argv[0][0] != '-':
         argv.append(argv.pop(0))
-
+    if 'PGTREE' in os.environ:
+        argv = os.environ["PGTREE"].split(' ') + argv
     try:
         opts, args = getopt.getopt(argv,
                                    "1IckKfxvinoyap:u:U:g:G:P:s:t:F:O:C:w:",
