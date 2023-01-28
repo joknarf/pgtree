@@ -10,7 +10,7 @@ import pgtree
 class ProctreeTest(unittest.TestCase):
     """tests for pgtree"""
     @patch('os.kill')
-    @patch('pgtree.runcmd')
+    @patch('pgtree.pgtree.runcmd')
     def test_tree1(self, mock_runcmd, mock_kill):
         """test"""
         print("tree: =======")
