@@ -106,7 +106,8 @@ class Proctree:
     """
 
     # pylint: disable=R0913
-    def __init__(self, use_uid=False, use_ascii=False, use_color=False, psfield=None):
+    def __init__(self, use_uid=False, use_ascii=False, use_color=False,
+                 pid_zero=True, psfield=None):
         """constructor"""
         self.pids = ('1')
         self.ps_info = {}        # ps command info stored
@@ -115,9 +116,9 @@ class Proctree:
         self.pids_tree = {}
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
-        self.get_psinfo(use_uid, psfield)
+        self.get_psinfo(use_uid, psfield, pid_zero)
 
-    def get_psinfo(self, use_uid, psfield):
+    def get_psinfo(self, use_uid, psfield, pid_zero):
         """parse unix ps command"""
         osname = platform.system()
         stime = 'stime'
@@ -162,6 +163,9 @@ class Proctree:
                 'comm': comm,
                 'args': args,
             }
+        if not pid_zero:
+            del self.ps_info['0']
+            del self.children['0']
 
     def pgrep(self, argv):
         """mini built-in pgrep if pgrep command not available
@@ -271,7 +275,7 @@ class Proctree:
 
     def print_tree(self, pids=None, child_only=False, sig=0, confirmed=False):
         """display full or children only process tree"""
-        self.pids = pids or '0' if '0' in self.children else '1'
+        self.pids = pids or ('0' if '0' in self.children else '1')
         self.build_tree()
         if sig:
             self.kill_with_children(sig=sig, confirmed=confirmed)
@@ -374,9 +378,6 @@ def main(argv):
             sig = 9
         elif opt == "-p":
             found = arg.split(',')
-        elif opt == "-1":
-            found = "1"
-            options["-c"] = True
         elif opt == "-O":
             psfield = arg
         elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
@@ -389,7 +390,9 @@ def main(argv):
 
     ptree = Proctree(use_uid='-I' in options,
                      use_ascii='-a' in options,
-                     use_color=colored(options['-C']), psfield=psfield)
+                     use_color=colored(options['-C']),
+                     pid_zero='-1' not in options,
+                     psfield=psfield)
 
     if pgrep_args:
         found = ptree.pgrep(pgrep_args)
