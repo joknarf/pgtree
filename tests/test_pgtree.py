@@ -152,8 +152,9 @@ class ProctreeTest(unittest.TestCase):
         """pgrep os"""
         print("test os pgrep")
         pgtree.main(['-C','y','-w','n','-f', '-i', '-u', 'root', '-x', '-t', 'pts/1', 'bash'])
+        pgtree.main("-1")
 
-    @patch.dict(os.environ, {"PGT_PGREP": ""})
+    @patch.dict(os.environ, {"PGT_PGREP": "", "PGTREE": "-1"})
     def test_pgrep(self):
         """pgrep built-in"""
         print("test pgrep built-in")

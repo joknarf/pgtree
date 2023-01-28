@@ -163,7 +163,7 @@ class Proctree:
     def pgrep(self, argv):
         """mini built-in pgrep if pgrep command not available
            [-f] [-x] [-i] [-u <user>] [pattern]"""
-        if "PGT_GREP" not in os.environ or os.environ["PGT_PGREP"]:
+        if "PGT_PGREP" not in os.environ or os.environ["PGT_PGREP"]:
             pgrep = runcmd(['pgrep'] + argv)
             return pgrep.split("\n")
 
