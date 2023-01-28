@@ -333,7 +333,7 @@ def main(argv):
     -C : color preference : y/yes/always or n/no/never (default auto)
     -w : tty wrap text : y/yes or n/no (default y)
     -a : use ascii characters
-    -O <psfield> : display <psfield> instead of 'stime' in output
+    -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
 
     by default display full process hierarchy (parents + children of selected processes)

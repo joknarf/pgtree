@@ -45,7 +45,7 @@ installation using setup.py, user install in `~/.local/bin`:
 ## Usage
 ```
 # pgtree -h
-    usage: pgtree.py [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -56,12 +56,13 @@ installation using setup.py, user install in `~/.local/bin`:
     -C : color preference : y/yes/always or n/no/never (default auto)
     -w : tty wrap text : y/yes or n/no (default y)
     -a : use ascii characters
-    -O <psfield> : display <psfield> instead of 'stime' in output
+    -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
 
     by default display full process hierarchy (parents + children of selected processes)
 
-    -p <pids> : select processes pids to display hierarchy (default 1)
+    -p <pids> : select processes pids to display hierarchy (default 0)
+    -1 : display hierachy children of pid 1 (not including pid 0)
     <pgrep args> : use pgrep to select processes (see pgrep -h)
 
     found pids are prefixed with ▶
@@ -78,6 +79,16 @@ show processes matching `bash` and their children
 kill all `sh` processes of user joknarf and their children
 
 <img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/91555424-48aa2180-e931-11ea-8f19-6054458aa79c.png" width="850px">
+
+Customize ps output fields:
+
+<img width="719" alt="image" src="https://user-images.githubusercontent.com/10117818/215278250-83440d9c-f1a1-4ac7-afa5-db4f1b1c6395.png">
+
+Put default options in PGTREE env variable:
+```
+# export PGTREE='-1 -O %cpu,stime -C y'
+# pgtree
+```
 
 ## Demo
 
