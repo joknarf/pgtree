@@ -196,6 +196,8 @@ class Proctree:
             pattern = "^" + pattern + "$"
         pids = []
         for pid,info in self.ps_info.items():
+            if pid == '0':
+                continue
             if re.search(pattern, info[psfield], flag) and \
                re.match(user, info["user"]):
                 pids.append(pid)
