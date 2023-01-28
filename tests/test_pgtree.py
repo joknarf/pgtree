@@ -13,13 +13,21 @@ class ProctreeTest(unittest.TestCase):
     @patch('pgtree.pgtree.runcmd')
     def test_tree1(self, mock_runcmd, mock_kill):
         """test"""
+        ps_out = 4*(130*'-'+' ')
         print("tree: =======")
-        ps_out = """-------------------- -------------------- ------------------------------ -------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------- ---
-                   1                    0 root                                                                        Aug12 init                                                                                                                               /init
-                  10                    1 joknarf                                                                     Aug12 bash                                                                                                                               -bash
-                  20                   10 joknarf                                                                     10:10 sleep                                                                                                                              /bin/sleep 60
-                  30                   10 joknarf                                                                     10:10 top                                                                                                                                /bin/top
-                  40                    1 root                                                                        11:01 bash                                                                                                                               -bash"""
+        ps_out = 4*(130*'-'+' ') + "\n"
+        ps_out += f'{"1":>130} {"0":>130} {"root":<130} {"Aug12":<130} {"init":<130} /init\n'
+        ps_out += f'{"10":>130} {"1":>130} {"joknarf":<130} {"Aug12":<130} {"bash":<130} -bash\n'
+        ps_out += f'{"20":>130} {"10":>130} {"joknarf":<130} {"10:10":<130} {"sleep":<130} /bin/sleep 60\n'
+        ps_out += f'{"30":>130} {"10":>130} {"joknarf":<130} {"10:10":<130} {"top":<130} /bin/top\n'
+        ps_out += f'{"40":>130} {"1":>130} {"root":<130} {"11:01":<130} {"bash":<130} -bash'
+        print(ps_out)
+#        ps_out = """-------------------- -------------------- ------------------------------ -------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------- ---
+#                   1                    0 root                                                                        Aug12 init                                                                                                                               /init
+#                  10                    1 joknarf                                                                     Aug12 bash                                                                                                                               -bash
+#                  20                   10 joknarf                                                                     10:10 sleep                                                                                                                              /bin/sleep 60
+#                  30                   10 joknarf                                                                     10:10 top                                                                                                                                /bin/top
+#                  40                    1 root                                                                        11:01 bash                                                                                                                               -bash"""
         mock_runcmd.return_value = ps_out
         mock_kill.return_value = True
         ptree = pgtree.Proctree()
@@ -32,6 +40,7 @@ class ProctreeTest(unittest.TestCase):
         }
         ps_info = {
             '0': {
+                'pid': '0',
                 'ppid': '-1',
                 'stime': 'stime',
                 'user': 'user',
@@ -39,6 +48,7 @@ class ProctreeTest(unittest.TestCase):
                 'args': 'args',
             },
             '1': {
+                'pid': '1',
                 'ppid': '0',
                 'stime': 'Aug12',
                 'user': 'root',
@@ -46,6 +56,7 @@ class ProctreeTest(unittest.TestCase):
                 'args': '/init',
             },
             '10': {
+                'pid': '10',
                 'ppid': '1',
                 'stime': 'Aug12',
                 'user': 'joknarf',
@@ -53,6 +64,7 @@ class ProctreeTest(unittest.TestCase):
                 'args': '-bash',
             },
             '20': {
+                'pid': '20',
                 'ppid': '10',
                 'stime': '10:10',
                 'user': 'joknarf',
@@ -60,6 +72,7 @@ class ProctreeTest(unittest.TestCase):
                 'args': '/bin/sleep 60',
             },
             '30': {
+                'pid': '30',
                 'ppid': '10',
                 'stime': '10:10',
                 'user': 'joknarf',
@@ -67,6 +80,7 @@ class ProctreeTest(unittest.TestCase):
                 'args': '/bin/top',
             },
             '40': {
+                'pid': '40',
                 'ppid': '1',
                 'stime': '11:01',
                 'user': 'root',
