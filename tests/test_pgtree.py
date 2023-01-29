@@ -154,7 +154,6 @@ class ProctreeTest(unittest.TestCase):
         pgtree.main(['-C','y','-w','n','-f', '-i', '-u', 'root', '-x', '-t', 'pts/1', 'bash'])
         pgtree.main("-1")
 
-    @patch.dict(os.environ, {"PGT_PGREP": "", "PGTREE": "-1"})
     def test_pgrep(self):
         """pgrep built-in"""
         print("test pgrep built-in")
@@ -162,7 +161,7 @@ class ProctreeTest(unittest.TestCase):
             pgtree.main(['-t', 'pts/1'])
         except SystemExit:
             pass
-        pgtree.main(['-I','-C','n','-w','n','-f', '-i', '-u', 'root', '-x', '/sbin/init'])
+        pgtree.main(['-R','-I','-C','n','-w','n','-f', '-i', '-u', 'root', '-x', '/sbin/init'])
 
 
 if __name__ == "__main__":

@@ -45,7 +45,7 @@ installation using setup.py, user install in `~/.local/bin`:
 ## Usage
 ```
 # pgtree -h
-    usage: pgtree.py [-W] [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-W] [-RIya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -53,6 +53,7 @@ installation using setup.py, user install in `~/.local/bin`:
     -k : kill -TERM processes and children
     -K : kill -KILL processes and children
     -y : do not ask for confirmation to kill
+    -R : force use of internal pgrep
     -C : color preference : y/yes/always or n/no/never (default auto)
     -w : tty wrap text : y/yes or n/no (default y)
     -W : use watch utility to execute pgtree with default interval
