@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # coding: utf-8
-# pylint: disable=C0114,C0413,R0902
+# pylint: disable=C0114,C0413,R0902,C0209
 # determine available python executable
 _=''''
 [ "$1" = -W ] && shift && exec watch -x -c -- "$0" -C y "$@"
@@ -133,12 +133,16 @@ class Proctree:
         user = 'uid' if use_uid else 'user'
         comm = 'comm' if osname == 'SunOS' else 'ucomm'
         ps_opts = ['pid', 'ppid', user] + self.ps_fields + [comm]
-        ps_cmd = 'ps -e ' + ' '.join([f'-o {opt}=' + 130*'-' for opt in ps_opts]) + ' -o args'
+        ps_cmd = 'ps -e ' + ' '.join(
+                    ['-o {0}='.format(o) + 130*'-' for o in ps_opts]
+                ) + ' -o args'
         # print(ps)
         ps_out = runcmd(ps_cmd.split(' ')).split('\n')
         ps_opts += ['args']
         pid_z = ["0", "0"] + ps_opts[2:] + ['args']
-        ps_out[0] = ' '.join([f'{{{i}:<130}}' for i,opt in enumerate(ps_opts)]).format(*pid_z)
+        ps_out[0] = ' '.join(
+                    ['{{{0}:<130}}'.format(i) for i,opt in enumerate(ps_opts)]
+            ).format(*pid_z)
         ps_opts = ['pid', 'ppid', 'user'] + self.ps_fields + ['comm', 'args']
         # print(ps_out[0])
         for line in ps_out:
