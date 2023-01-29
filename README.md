@@ -45,7 +45,7 @@ installation using setup.py, user install in `~/.local/bin`:
 ## Usage
 ```
 # pgtree -h
-    usage: pgtree.py [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-W] [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -55,6 +55,7 @@ installation using setup.py, user install in `~/.local/bin`:
     -y : do not ask for confirmation to kill
     -C : color preference : y/yes/always or n/no/never (default auto)
     -w : tty wrap text : y/yes or n/no (default y)
+    -W : use watch utility to execute pgtree with default interval
     -a : use ascii characters
     -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
@@ -89,6 +90,12 @@ Put default options in PGTREE env variable:
 # export PGTREE='-1 -O %cpu,stime -C y'
 # pgtree
 ```
+
+Use watch utility to follow process tree:
+```
+# pgtree -W bash
+```
+![image](https://user-images.githubusercontent.com/10117818/215317322-7df4559c-ccf4-41f6-b008-55d1fc8f0bb7.png)
 
 ## Demo
 
