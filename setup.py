@@ -15,9 +15,9 @@ setup(
     url="https://github.com/joknarf/pgtree",
     packages=["pgtree"],
     scripts=["pgtree/pgtree"],
-    use_incremental=True,
-    setup_requires=['incremental'],
-    install_requires=['incremental'],
+    use_incremental=False,
+    setup_requires=[],
+    install_requires=[],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
