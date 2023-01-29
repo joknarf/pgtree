@@ -3,6 +3,7 @@
 # pylint: disable=C0114,C0413,R0902
 # determine available python executable
 _=''''
+[ "$1" = -W ] && shift && exec watch -x -c -- "$0" -C y "$@"
 export PGT_PGREP=$(type -p pgrep)
 python=$(type -p python || type -p python3 || type -p python2)
 [ "$python" ] && exec $python "$0" "$@"
@@ -322,7 +323,7 @@ def wrap_text(opt):
 def main(argv):
     """pgtree command line"""
     usage = """
-    usage: pgtree.py [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
+    usage: pgtree.py [-W] [-Iya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
 
     -I : use -o uid instead of -o user for ps command
          (if uid/user mapping is broken ps command can be stuck)
@@ -332,6 +333,7 @@ def main(argv):
     -y : do not ask for confirmation to kill
     -C : color preference : y/yes/always or n/no/never (default auto)
     -w : tty wrap text : y/yes or n/no (default y)
+    -W : use watch utility to execute pgtree with default interval
     -a : use ascii characters
     -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
