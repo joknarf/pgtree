@@ -147,7 +147,7 @@ class Proctree:
         # print(ps_out[0])
         for line in ps_out:
             # print(line)
-            infos = {v:line[i*131:min(i*131+130, len(line))].strip() for i,v in enumerate(ps_opts)}
+            infos = dict((v, line[i*131:min(i*131+130, len(line))].strip()) for i,v in enumerate(ps_opts))
             # print(infos)
             infos['comm'] = os.path.basename(infos['comm'])
             pid = infos['pid']
