@@ -158,7 +158,7 @@ class ProctreeTest(unittest.TestCase):
         """pgrep built-in"""
         print("test pgrep built-in")
         try:
-            pgtree.main(['-t', 'pts/1'])
+            pgtree.main(['-R','-t', 'pts/1'])
         except SystemExit:
             pass
         pgtree.main(['-R','-I','-C','n','-w','n','-f', '-i', '-u', 'root', '-x', '/sbin/init'])
