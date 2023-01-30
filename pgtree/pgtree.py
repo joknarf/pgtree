@@ -32,6 +32,11 @@ $ ./pgtree.py sshd
             └─1182 (joknarf) [bash] -bash
               ├─1905 (joknarf) [sleep] sleep 60
               └─1906 (joknarf) [top] top
+
+Reminder for compatibility with old python versions:
+no dict comprehension or dict simili comprehension
+no f string or string .format()
+no inline if
 """
 
 __author__ = "Franck Jouvanceau"
@@ -113,43 +118,59 @@ class Proctree:
 
     # pylint: disable=R0913
     def __init__(self, use_uid=False, use_ascii=False, use_color=False,
-                 pid_zero=True, psfield=None):
+                 pid_zero=True, optfields=None):
         """constructor"""
-        self.pids = ('1')
+        self.pids = []
         self.ps_info = {}        # ps command info stored
         self.children = {}       # children of pid
         self.selected_pids = []  # pids and their children
         self.pids_tree = {}
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
-        self.ps_fields = psfield.split(',') if psfield else None
-        self.get_psinfo(use_uid, pid_zero)
+        self.ps_fields = self.get_fields(optfields, use_uid)
+        self.get_psinfo(pid_zero)
 
-    def get_psinfo(self, use_uid, pid_zero):
-        """parse unix ps command"""
+    def get_fields(self, optfields=None, use_uid=False):
+        """ Get ps fields from OS / optionnal fields """
         osname = platform.system()
-        if not self.ps_fields:
-            self.ps_fields = ['start'] if osname in ['AIX', 'Darwin'] else ['stime']
-        user = 'uid' if use_uid else 'user'
-        comm = 'comm' if osname == 'SunOS' else 'ucomm'
-        ps_opts = ['pid', 'ppid', user] + self.ps_fields + [comm]
+        if optfields:
+            opt_fields = optfields.split(',')
+        else:
+            if osname in ['AIX', 'Darwin']:
+                opt_fields = ['start']
+            else:
+                opt_fields = ['stime']
+        if use_uid:
+            user = 'uid'
+        else:
+            user = 'user'
+        if osname == 'SunOS':
+            comm = 'comm'
+        else:
+            comm = 'ucomm'
+
+        return ['pid', 'ppid', user, comm] + opt_fields
+
+    def get_psinfo(self, pid_zero):
+        """parse unix ps command"""
+
         ps_cmd = 'ps -e ' + ' '.join(
-                    ['-o ' + o + '=' + 130*'-' for o in ps_opts]
+                    ['-o ' + o + '=' + 130*'-' for o in self.ps_fields]
                 ) + ' -o args'
         # print(ps_cmd)
         ps_out = runcmd(ps_cmd.split(' ')).split('\n')
-        ps_opts += ['args']
-        pid_z = ["0", "0"] + ps_opts[2:] + ['args']
-        ps_out[0] = ' '.join(['%-130s' % opt for opt in pid_z])
-        ps_opts = ['pid', 'ppid', 'user'] + self.ps_fields + ['comm', 'args']
+        pid_z = ["0", "0"] + self.ps_fields[2:]
+        ps_out[0] = ' '.join(['%-130s' % opt for opt in pid_z] + ['args'])
+        ps_opts = ['pid', 'ppid', 'user', 'comm'] + self.ps_fields[4:]
         # print(ps_out[0])
         for line in ps_out:
             # print(line)
-            infos = dict((v, line[i*131:min(i*131+130, len(line))].strip())
-                        for i,v in enumerate(ps_opts)
-                    )
-            # print(infos)
+            infos = {}
+            for i,field in enumerate(ps_opts):
+                infos[field] = line[i*131:i*131+130].strip()
+            infos['args'] = line[len(ps_opts)*131:len(line)]
             infos['comm'] = os.path.basename(infos['comm'])
+            # print(infos)
             pid = infos['pid']
             ppid = infos['ppid']
             if pid == str(os.getpid()):
@@ -258,7 +279,8 @@ class Proctree:
                       self.treedisp.colorize('user', ' (' + self.ps_info[pid]['user'] + ') ') + \
                       self.treedisp.colorize('comm', '[' + self.ps_info[pid]['comm'] + '] ')
             ps_info += ' '.join(
-                        [self.treedisp.colorize(f, self.ps_info[pid][f]) for f in self.ps_fields])
+                [self.treedisp.colorize(f, self.ps_info[pid][f]) for f in self.ps_fields[4:]]
+            )
             ps_info += ' ' + self.ps_info[pid]['args']
             output = ppre + curr_p + ps_info
             print(output)
@@ -274,7 +296,13 @@ class Proctree:
 
     def print_tree(self, pids=None, child_only=False, sig=0, confirmed=False):
         """display full or children only process tree"""
-        self.pids = pids or ('0' if '0' in self.children else '1')
+        if pids:
+            self.pids = pids
+        else:
+            if '0' in self.children:
+                self.pids = ['0']
+            else:
+                self.pids = ['1']
         self.build_tree()
         if sig:
             self.kill_with_children(sig=sig, confirmed=confirmed)
@@ -369,7 +397,7 @@ def main(argv):
     pgrep_args = []
     found = None
     options = {}
-    psfield = None
+    psfields = None
     options['-C'] = 'auto'
     options['-w'] = 'yes'
     for opt, arg in opts:
@@ -381,7 +409,7 @@ def main(argv):
         elif opt == "-p":
             found = arg.split(',')
         elif opt == "-O":
-            psfield = arg
+            psfields = arg
         elif opt == "-R":
             os.environ["PGT_PGREP"] = ""
         elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
@@ -396,7 +424,7 @@ def main(argv):
                      use_ascii='-a' in options,
                      use_color=colored(options['-C']),
                      pid_zero='-1' not in options,
-                     psfield=psfield)
+                     optfields=psfields)
 
     if pgrep_args:
         found = ptree.pgrep(pgrep_args)
