@@ -16,18 +16,12 @@ class ProctreeTest(unittest.TestCase):
         ps_out = 4*(130*'-'+' ')
         print("tree: =======")
         ps_out = 4*(130*'-'+' ') + "\n"
-        ps_out += f'{"1":>130} {"0":>130} {"root":<130} {"init":<130} {"Aug12":<130} /init\n'
-        ps_out += f'{"10":>130} {"1":>130} {"joknarf":<130} {"bash":<130} {"Aug12":<130} -bash\n'
-        ps_out += f'{"20":>130} {"10":>130} {"joknarf":<130} {"sleep":<130} {"10:10":<130} /bin/sleep 60\n'
-        ps_out += f'{"30":>130} {"10":>130} {"joknarf":<130} {"top":<130} {"10:10":<130} /bin/top\n'
-        ps_out += f'{"40":>130} {"1":>130} {"root":<130} {"bash":<130} {"11:01":<130} -bash'
+        ps_out += f'{"1":>30} {"0":>30} {"root":<30} {"init":<130} {"Aug12":<50} /init\n'
+        ps_out += f'{"10":>30} {"1":>30} {"joknarf":<30} {"bash":<130} {"Aug12":<50} -bash\n'
+        ps_out += f'{"20":>30} {"10":>30} {"joknarf":<30} {"sleep":<130} {"10:10":<50} /bin/sleep 60\n'
+        ps_out += f'{"30":>30} {"10":>30} {"joknarf":<30} {"top":<130} {"10:10":<50} /bin/top\n'
+        ps_out += f'{"40":>30} {"1":>30} {"root":<30} {"bash":<130} {"11:01":<50} -bash'
         print(ps_out)
-#        ps_out = """-------------------- -------------------- ------------------------------ -------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------- ---
-#                   1                    0 root                                                                        Aug12 init                                                                                                                               /init
-#                  10                    1 joknarf                                                                     Aug12 bash                                                                                                                               -bash
-#                  20                   10 joknarf                                                                     10:10 sleep                                                                                                                              /bin/sleep 60
-#                  30                   10 joknarf                                                                     10:10 top                                                                                                                                /bin/top
-#                  40                    1 root                                                                        11:01 bash                                                                                                                               -bash"""
         mock_runcmd.return_value = ps_out
         mock_kill.return_value = True
         ptree = pgtree.Proctree()
@@ -163,6 +157,13 @@ class ProctreeTest(unittest.TestCase):
         except SystemExit:
             pass
         pgtree.main(['-I','-C','n','-w','n','-f', '-i', '-u', 'root', '-x', '/sbin/init'])
+
+    @patch('time.sleep')
+    def test_watch(self, mock_sleep):
+        """watch built-in"""
+        print("test watch built-in")
+        mock_sleep.return_value = True
+        pgtree.main(['-W', 'bash'])
 
 
 if __name__ == "__main__":

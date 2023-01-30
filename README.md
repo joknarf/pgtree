@@ -56,7 +56,7 @@ installation using setup.py, user install in `~/.local/bin`:
     -R : force use of internal pgrep
     -C : color preference : y/yes/always or n/no/never (default auto)
     -w : tty wrap text : y/yes or n/no (default y)
-    -W : use watch utility to execute pgtree with default interval
+    -W : watch and follow process tree every 2s
     -a : use ascii characters
     -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command

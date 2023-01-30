@@ -3,7 +3,7 @@
 # pylint: disable=C0114,C0413,R0902,C0209
 # determine available python executable
 _=''''
-[ "$1" = -W ] && shift && exec watch -x -c -- "$0" -C y "$@"
+#[ "$1" = -W ] && shift && exec watch -x -c -- "$0" -C y "$@"
 export PGT_PGREP=$(type -p pgrep)
 python=$(type -p python || type -p python3 || type -p python2)
 [ "$python" ] && exec $python "$0" "$@"
@@ -48,6 +48,7 @@ import os
 import getopt
 import platform
 import re
+import time
 
 # pylint: disable=E0602
 # pylint: disable=E1101
@@ -118,7 +119,7 @@ class Proctree:
 
     # pylint: disable=R0913
     def __init__(self, use_uid=False, use_ascii=False, use_color=False,
-                 pid_zero=True, optfields=None):
+                 pid_zero=True, opt_fields=None):
         """constructor"""
         self.pids = []
         self.ps_info = {}        # ps command info stored
@@ -127,15 +128,13 @@ class Proctree:
         self.pids_tree = {}
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
-        self.ps_fields = self.get_fields(optfields, use_uid)
+        self.ps_fields = self.get_fields(opt_fields, use_uid)
         self.get_psinfo(pid_zero)
 
-    def get_fields(self, optfields=None, use_uid=False):
+    def get_fields(self, opt_fields=None, use_uid=False):
         """ Get ps fields from OS / optionnal fields """
         osname = platform.system()
-        if optfields:
-            opt_fields = optfields.split(',')
-        else:
+        if not opt_fields:
             if osname in ['AIX', 'Darwin']:
                 opt_fields = ['start']
             else:
@@ -153,22 +152,26 @@ class Proctree:
 
     def get_psinfo(self, pid_zero):
         """parse unix ps command"""
-
+        widths = [30, 30, 30, 130] + [50 for i in self.ps_fields[4:]]
         ps_cmd = 'ps -e ' + ' '.join(
-                    ['-o ' + o + '=' + 130*'-' for o in self.ps_fields]
+                    ['-o '+ o +'='+ widths[i]*'-' for i,o in enumerate(self.ps_fields)]
                 ) + ' -o args'
         # print(ps_cmd)
         ps_out = runcmd(ps_cmd.split(' ')).split('\n')
         pid_z = ["0", "0"] + self.ps_fields[2:]
-        ps_out[0] = ' '.join(['%-130s' % opt for opt in pid_z] + ['args'])
+        ps_out[0] = ' '.join(
+                [('%-'+ str(widths[i]) +'s') % opt for i,opt in enumerate(pid_z)] + ['args']
+        )
         ps_opts = ['pid', 'ppid', 'user', 'comm'] + self.ps_fields[4:]
         # print(ps_out[0])
         for line in ps_out:
             # print(line)
             infos = {}
+            col = 0
             for i,field in enumerate(ps_opts):
-                infos[field] = line[i*131:i*131+130].strip()
-            infos['args'] = line[len(ps_opts)*131:len(line)]
+                infos[field] = line[col:col+widths[i]].strip()
+                col = col + widths[i] + 1
+            infos['args'] = line[col:len(line)]
             infos['comm'] = os.path.basename(infos['comm'])
             # print(infos)
             pid = infos['pid']
@@ -352,6 +355,38 @@ def wrap_text(opt):
         after = ''
     return after
 
+def pgtree(options, psfields, pgrep_args):
+    """ Display process tree from options """
+    ptree = Proctree(use_uid='-I' in options,
+                     use_ascii='-a' in options,
+                     use_color=colored(options['-C']),
+                     pid_zero='-1' not in options,
+                     opt_fields=psfields)
+
+    found = None
+    if '-p' in options:
+        found = options['-p'].split(',')
+    elif pgrep_args:
+        found = ptree.pgrep(pgrep_args)
+    return (ptree, found)
+
+def watch_pgtree(options, psfields, pgrep_args, sig):
+    """ follow process hierarchy """
+    while True:
+        try:
+            (ptree, found) = pgtree(options, psfields, pgrep_args)
+            cur_time = time.strftime("%c", time.localtime())
+            sys.stdout.write("\033c")
+            wrap_text(options['-w'])
+            sys.stdout.write("Every 2.0s: " + ' '.join(sys.argv) + "    " + cur_time + "\n\n")
+            ptree.print_tree(pids=found, child_only='-c' in options, sig=sig,
+                     confirmed='-y' in options)
+            if time.sleep(2):
+                break
+        except KeyboardInterrupt:
+            break
+
+
 def main(argv):
     """pgtree command line"""
     usage = """
@@ -366,7 +401,7 @@ def main(argv):
     -R : force use of internal pgrep
     -C : color preference : y/yes/always or n/no/never (default auto)
     -w : tty wrap text : y/yes or n/no (default y)
-    -W : use watch utility to execute pgtree with default interval
+    -W : watch and follow process tree every 2s
     -a : use ascii characters
     -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
@@ -387,7 +422,7 @@ def main(argv):
         argv = os.environ["PGTREE"].split(' ') + argv
     try:
         opts, args = getopt.getopt(argv,
-                                   "1IRckKfxvinoyap:u:U:g:G:P:s:t:F:O:C:w:",
+                                   "W1IRckKfxvinoyap:u:U:g:G:P:s:t:F:O:C:w:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
@@ -395,7 +430,6 @@ def main(argv):
 
     sig = 0
     pgrep_args = []
-    found = None
     options = {}
     psfields = None
     options['-C'] = 'auto'
@@ -406,10 +440,8 @@ def main(argv):
             sig = 15
         elif opt == "-K":
             sig = 9
-        elif opt == "-p":
-            found = arg.split(',')
         elif opt == "-O":
-            psfields = arg
+            psfields = arg.split(',')
         elif opt == "-R":
             os.environ["PGT_PGREP"] = ""
         elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
@@ -417,19 +449,13 @@ def main(argv):
         elif opt in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
             pgrep_args += [opt, arg]
     pgrep_args += args
-
     after = wrap_text(options['-w'])
-
-    ptree = Proctree(use_uid='-I' in options,
-                     use_ascii='-a' in options,
-                     use_color=colored(options['-C']),
-                     pid_zero='-1' not in options,
-                     optfields=psfields)
-
-    if pgrep_args:
-        found = ptree.pgrep(pgrep_args)
-    ptree.print_tree(pids=found, child_only='-c' in options, sig=sig,
-                     confirmed='-y' in options)
+    if '-W' in options:
+        watch_pgtree(options, psfields, pgrep_args, sig)
+    else:
+        (ptree, found) = pgtree(options, psfields, pgrep_args)
+        ptree.print_tree(pids=found, child_only='-c' in options, sig=sig,
+                         confirmed='-y' in options)
     sys.stdout.write(after)
 
 
