@@ -171,5 +171,14 @@ class ProctreeTest(unittest.TestCase):
     def test_simpleps(self):
         pgtree.main([])
 
+    def test_psfail(self):
+        """test"""
+        print('psfail ========')
+        try:
+            pgtree.main(['-O abcd'])
+        except SystemExit:
+            pass
+
+
 if __name__ == "__main__":
     unittest.main(failfast=True)

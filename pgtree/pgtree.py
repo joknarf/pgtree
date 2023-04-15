@@ -150,7 +150,7 @@ class Proctree:
         else:
             user = 'user'
 
-        if not opt_fields:
+        if not opt_fields or not os.environ.get('PGT_COMM'):
             opt_fields = [os.environ.get('PGT_STIME') or 'stime']
 
         return ['pid', 'ppid', user, os.environ.get('PGT_COMM') or 'ucomm'] + opt_fields
@@ -160,10 +160,12 @@ class Proctree:
         if os.environ.get('PGT_COMM'):
             ps_cmd = 'ps -e ' + ' '.join(
                     ['-o '+ o +'='+ widths[i]*'-' for i,o in enumerate(self.ps_fields)]
-                ) + ' -o args 2>/dev/null'
-            _, ps_out = runcmd(ps_cmd)
+                ) + ' -o args'
+            err, ps_out = runcmd(ps_cmd)
+            if err:
+                print(f'Error: executing ps -e -o {",".join(self.ps_fields)}')
+                sys.exit(1)
             return ps_out.splitlines()
-
         _, out = runcmd('ps -ef') # user pid ppid tty stime command
         ps_out = []
         out = out.splitlines()
@@ -181,7 +183,6 @@ class Proctree:
                     ps_info = line.strip().split(None, len(fields)-1)
                     ps_info[fields["stime"]] += ps_info.pop(fields["stime"]+1)
             ps_info.append(os.path.basename(ps_info[fields["args"]].split()[0]))
-            print(self.ps_fields)
             ps_out.append(' '.join(
                 [('%-'+ str(widths[i]) +'s') % ps_info[fields[opt]]
                  for i,opt in enumerate(self.ps_fields)] + [ps_info[fields["args"]]]
