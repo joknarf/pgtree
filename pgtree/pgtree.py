@@ -178,9 +178,10 @@ class Proctree:
             if "stime" in fields:
                 if ps_info[fields["stime"]] in ["Jan","Feb","Mar","Apr","May","Jun",
                                            "Jui","Aug","Sep","Oct","Nov","Dec"]:
-                    ps_info = line.strip().split(None, len(fields))
-                    ps_info[fields["stime"]] += ps_info.pop(fields["stime"]-1)
-            ps_info.append(os.path.basename(ps_info[fields["args"]]))
+                    ps_info = line.strip().split(None, len(fields)-1)
+                    ps_info[fields["stime"]] += ps_info.pop(fields["stime"]+1)
+            ps_info.append(os.path.basename(ps_info[fields["args"]].split()[0]))
+            print(self.ps_fields)
             ps_out.append(' '.join(
                 [('%-'+ str(widths[i]) +'s') % ps_info[fields[opt]]
                  for i,opt in enumerate(self.ps_fields)] + [ps_info[fields["args"]]]

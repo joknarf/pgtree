@@ -6,6 +6,8 @@ from unittest.mock import patch
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import pgtree
 #from unittest.mock import MagicMock, Mock, patch
+os.environ['PGT_COMM'] = 'ucomm'
+os.environ['PGT_STIME'] = 'stime'
 
 class ProctreeTest(unittest.TestCase):
     """tests for pgtree"""
@@ -22,7 +24,7 @@ class ProctreeTest(unittest.TestCase):
         ps_out += f'{"30":>30} {"10":>30} {"joknarf":<30} {"top":<130} {"10:10":<50} /bin/top\n'
         ps_out += f'{"40":>30} {"1":>30} {"root":<30} {"bash":<130} {"11:01":<50} -bash'
         print(ps_out)
-        mock_runcmd.return_value = ps_out
+        mock_runcmd.return_value = 0, ps_out
         mock_kill.return_value = True
         ptree = pgtree.Proctree()
 
