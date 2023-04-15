@@ -2,9 +2,18 @@
 # coding: utf-8
 # pylint: disable=C0114,C0413,R0902,C0209
 # determine available python executable
+# determine ps -o options
 _=''''
 #[ "$1" = -W ] && shift && exec watch -x -c -- "$0" -C y "$@"
-export PGT_PGREP=$(type -p pgrep)
+PGT_PGREP=$(type -p pgrep)
+ps -p $$ -o ucomm >/dev/null 2>&1 && PGT_COMM=ucomm
+[ ! "$PGT_COMM" ] && ps -p $$ -o comm >/dev/null 2>&1 && PGT_COMM=comm
+[ "$PGT_COMM" ] && {
+    ps -p $$ -o stime >/dev/null 2>&1 && PGT_STIME=stime
+    [ ! "$PGT_STIME" ] && ps -p $$ -o start >/dev/null 2>&1 && PGT_STIME=start
+    [ ! "$PGT_STIME" ] && PGT_STIME=time
+}
+export PGT_COMM PGT_STIME PGT_PGREP
 python=$(type -p python || type -p python3 || type -p python2)
 [ "$python" ] && exec $python "$0" "$@"
 echo "ERROR: cannot find python interpreter" >&2
@@ -46,10 +55,11 @@ __license__ = "MIT"
 import sys
 import os
 import getopt
-import platform
 import re
-import time
-
+try:
+    import time
+except ImportError:
+    pass
 # pylint: disable=E0602
 # pylint: disable=E1101
 if sys.version_info < (3, 0):
@@ -58,10 +68,10 @@ if sys.version_info < (3, 0):
 
 def runcmd(cmd):
     """run command"""
-    pipe = os.popen('"' + '" "'.join(cmd) + '"', 'r')
+    pipe = os.popen(cmd, 'r')
     std_out = pipe.read()
-    pipe.close()
-    return std_out.rstrip('\n')
+    res = pipe.close()
+    return res, std_out.rstrip('\n')
 
 def ask(prompt):
     """input text"""
@@ -133,39 +143,58 @@ class Proctree:
 
     def get_fields(self, opt_fields=None, use_uid=False):
         """ Get ps fields from OS / optionnal fields """
-        osname = platform.system()
-        if not opt_fields:
-            if osname in ['AIX', 'Darwin']:
-                opt_fields = ['start']
-            else:
-                opt_fields = ['stime']
         if use_uid:
             user = 'uid'
         else:
             user = 'user'
-        if osname == 'SunOS':
-            comm = 'comm'
-        else:
-            comm = 'ucomm'
 
-        return ['pid', 'ppid', user, comm] + opt_fields
+        if not opt_fields:
+            opt_fields = [os.environ.get('PGT_STIME', 'stime')]
+
+        return ['pid', 'ppid', user, os.environ.get('PGT_COMM', 'ucomm')] + opt_fields
+
+    def run_ps(self, widths):
+        """ ps command not supporting -o (mingw/msys2) / guess output """
+        if os.environ.get('PGT_COMM'):
+            ps_cmd = 'ps -e ' + ' '.join(
+                    ['-o '+ o +'='+ widths[i]*'-' for i,o in enumerate(self.ps_fields)]
+                ) + ' -o args 2>/dev/null'
+            _, ps_out = runcmd(ps_cmd)
+            return ps_out.splitlines()
+
+        _, out = runcmd('ps -ef') # user pid ppid tty stime command
+        ps_out = []
+        out = out.splitlines()
+        fields = {}
+        for i,field in enumerate(out[0].strip().lower().split()):
+            field = re.sub("command|cmd", "args", field)
+            field = re.sub("uid", "user", field)
+            fields[field] = i
+        fields["ucomm"] = len(fields)
+        for line in out:
+            ps_info = line.strip().split(None, len(fields)-2)
+            if "stime" in fields:
+                if ps_info[fields["stime"]] in ["Jan","Feb","Mar","Apr","May","Jun",
+                                           "Jui","Aug","Sep","Oct","Nov","Dec"]:
+                    ps_info = line.strip().split(None, len(fields))
+                    ps_info[fields["stime"]] += ps_info.pop(fields["stime"]-1)
+            ps_info.append(os.path.basename(ps_info[fields["args"]]))
+            ps_out.append(' '.join(
+                [('%-'+ str(widths[i]) +'s') % ps_info[fields[opt]]
+                 for i,opt in enumerate(self.ps_fields)] + [ps_info[fields["args"]]]
+            ))
+        return ps_out
 
     def get_psinfo(self, pid_zero):
         """parse unix ps command"""
         widths = [30, 30, 30, 130] + [50 for i in self.ps_fields[4:]]
-        ps_cmd = 'ps -e ' + ' '.join(
-                    ['-o '+ o +'='+ widths[i]*'-' for i,o in enumerate(self.ps_fields)]
-                ) + ' -o args'
-        # print(ps_cmd)
-        ps_out = runcmd(ps_cmd.split(' ')).split('\n')
+        ps_out = self.run_ps(widths)
         pid_z = ["0", "0"] + self.ps_fields[2:]
         ps_out[0] = ' '.join(
                 [('%-'+ str(widths[i]) +'s') % opt for i,opt in enumerate(pid_z)] + ['args']
         )
         ps_opts = ['pid', 'ppid', 'user', 'comm'] + self.ps_fields[4:]
-        # print(ps_out[0])
         for line in ps_out:
-            # print(line)
             infos = {}
             col = 0
             for i,field in enumerate(ps_opts):
@@ -173,7 +202,6 @@ class Proctree:
                 col = col + widths[i] + 1
             infos['args'] = line[col:len(line)]
             infos['comm'] = os.path.basename(infos['comm'])
-            # print(infos)
             pid = infos['pid']
             ppid = infos['ppid']
             if pid == str(os.getpid()):
@@ -185,6 +213,8 @@ class Proctree:
                 self.children[ppid] = []
             self.children[ppid].append(pid)
             self.ps_info[pid] = infos
+        if not self.ps_info.get('1'):
+            self.ps_info['1'] = self.ps_info['0']
         if not pid_zero:
             del self.ps_info['0']
             del self.children['0']
@@ -193,7 +223,7 @@ class Proctree:
         """mini built-in pgrep if pgrep command not available
            [-f] [-x] [-i] [-u <user>] [pattern]"""
         if "PGT_PGREP" not in os.environ or os.environ["PGT_PGREP"]:
-            pgrep = runcmd(['pgrep'] + argv)
+            _, pgrep = runcmd('pgrep ' +' '.join(argv))
             return pgrep.split("\n")
 
         try:
