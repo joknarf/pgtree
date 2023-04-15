@@ -13,6 +13,8 @@ ps -p $$ -o ucomm >/dev/null 2>&1 && PGT_COMM=ucomm
     [ ! "$PGT_STIME" ] && ps -p $$ -o start >/dev/null 2>&1 && PGT_STIME=start
     [ ! "$PGT_STIME" ] && PGT_STIME=time
 }
+# busybox no -p option
+[ ! "$PGT_COMM" ] && ! ps -p $$ >/dev/null 2>&1 && PGT_COMM=comm && PGT_STIME=time
 export PGT_COMM PGT_STIME PGT_PGREP
 python=$(type -p python || type -p python3 || type -p python2)
 [ "$python" ] && exec $python "$0" "$@"
