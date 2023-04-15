@@ -5,6 +5,7 @@
 # determine ps -o options
 _=''''
 #[ "$1" = -W ] && shift && exec watch -x -c -- "$0" -C y "$@"
+export LANG=en_US.UTF-8 PYTHONUTF8=1 PYTHONIOENCODING=utf8
 PGT_PGREP=$(type -p pgrep)
 ps -p $$ -o ucomm >/dev/null 2>&1 && PGT_COMM=ucomm
 [ ! "$PGT_COMM" ] && ps -p $$ -o comm >/dev/null 2>&1 && PGT_COMM=comm
@@ -62,11 +63,13 @@ try:
     import time
 except ImportError:
     pass
+
+# To test with python2
 # pylint: disable=E0602
 # pylint: disable=E1101
-if sys.version_info < (3, 0):
-    reload(sys)
-    sys.setdefaultencoding('utf8')
+#if sys.version_info < (3, 0):
+#    reload(sys)
+#    sys.setdefaultencoding('utf8')
 
 def runcmd(cmd):
     """run command"""
@@ -163,7 +166,7 @@ class Proctree:
                 ) + ' -o args'
             err, ps_out = runcmd(ps_cmd)
             if err:
-                print(f'Error: executing ps -e -o {",".join(self.ps_fields)}')
+                print('Error: executing ps -e -o ' + ",".join(self.ps_fields))
                 sys.exit(1)
             return ps_out.splitlines()
         _, out = runcmd('ps -ef') # user pid ppid tty stime command
