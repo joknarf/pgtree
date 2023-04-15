@@ -151,9 +151,9 @@ class Proctree:
             user = 'user'
 
         if not opt_fields:
-            opt_fields = [os.environ.get('PGT_STIME', 'stime')]
+            opt_fields = [os.environ.get('PGT_STIME') or 'stime']
 
-        return ['pid', 'ppid', user, os.environ.get('PGT_COMM', 'ucomm')] + opt_fields
+        return ['pid', 'ppid', user, os.environ.get('PGT_COMM') or 'ucomm'] + opt_fields
 
     def run_ps(self, widths):
         """ ps command not supporting -o (mingw/msys2) / guess output """

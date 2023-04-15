@@ -167,6 +167,9 @@ class ProctreeTest(unittest.TestCase):
         mock_sleep.return_value = True
         pgtree.main(['-W', 'bash'])
 
+    @patch.dict(os.environ, {"PGT_COMM": "", "PGT_STIME": ""})
+    def test_simpleps(self):
+        pgtree.main([])
 
 if __name__ == "__main__":
     unittest.main(failfast=True)
