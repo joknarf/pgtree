@@ -57,6 +57,7 @@ __license__ = "MIT"
 
 import sys
 import os
+import platform
 import getopt
 import re
 try:
@@ -64,12 +65,9 @@ try:
 except ImportError:
     pass
 
-# To test with python2
-# pylint: disable=E0602
-# pylint: disable=E1101
-#if sys.version_info < (3, 0):
-#    reload(sys)
-#    sys.setdefaultencoding('utf8')
+# impossible detection using ps for AIX/MacOS
+if platform.system() in ['AIX', 'Darwin']:
+    os.environ['PGT_STIME'] = 'start'
 
 def runcmd(cmd):
     """run command"""
