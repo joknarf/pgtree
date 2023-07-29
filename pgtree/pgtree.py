@@ -67,8 +67,13 @@ except ImportError:
 
 # impossible detection using ps for AIX/MacOS
 # stime is not start time of process
-if platform.system() in ['AIX', 'Darwin']:
+system = platform.system()
+PS_OPTION = 'ax'
+if system in ['AIX', 'Darwin']:
     os.environ['PGT_STIME'] = 'start'
+elif system == 'SunOS': # ps ax -o not supported
+    PS_OPTION = '-e'
+    os.environ['PGT_COMM'] = 'fname' # comm header width not respected
 
 def runcmd(cmd):
     """run command"""
@@ -163,12 +168,12 @@ class Proctree:
             guess columns for ps command not supporting -o (mingw/msys2)
         """
         if os.environ.get('PGT_COMM'):
-            ps_cmd = 'ps ax ' + ' '.join(
+            ps_cmd = 'ps ' + PS_OPTION + ' ' + ' '.join(
                     ['-o '+ o +'='+ widths[i]*'-' for i,o in enumerate(self.ps_fields)]
                 ) + ' -o args'
             err, ps_out = runcmd(ps_cmd)
             if err:
-                print('Error: executing ps ax -o ' + ",".join(self.ps_fields))
+                print('Error: executing ps ' + PS_OPTION + ' -o ' + ",".join(self.ps_fields))
                 sys.exit(1)
             return ps_out.splitlines()
         _, out = runcmd('ps aux') # try to use header to guess columns
