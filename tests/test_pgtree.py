@@ -142,7 +142,7 @@ class ProctreeTest(unittest.TestCase):
     def test_main7(self):
         """test"""
         print('main7 ========')
-        pgtree.main(['-O', '%cpu', 'bash'])
+        pgtree.main(['-C', 'y', '-O', '%cpu', 'init'])
 
     def test_ospgrep(self):
         """pgrep os"""

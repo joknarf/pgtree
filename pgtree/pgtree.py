@@ -29,7 +29,7 @@ Like pstree but with searching for specific processes with pgrep first and displ
 hierarchy of matching processes (parents and children)
 should work on any Unix supporting commands :
 # pgrep
-# ps -e -o pid,ppid,comm,args
+# ps ax -o pid,ppid,comm,args
 (RedHat/CentOS/Fedora/Ubuntu/Suse/Solaris...)
 Compatible python 2 / 3
 
@@ -66,6 +66,7 @@ except ImportError:
     pass
 
 # impossible detection using ps for AIX/MacOS
+# stime is not start time of process
 if platform.system() in ['AIX', 'Darwin']:
     os.environ['PGT_STIME'] = 'start'
 
@@ -157,24 +158,33 @@ class Proctree:
         return ['pid', 'ppid', user, os.environ.get('PGT_COMM') or 'ucomm'] + opt_fields
 
     def run_ps(self, widths):
-        """ ps command not supporting -o (mingw/msys2) / guess output """
+        """
+            run ps command detected setting columns widths
+            guess columns for ps command not supporting -o (mingw/msys2)
+        """
         if os.environ.get('PGT_COMM'):
-            ps_cmd = 'ps -e ' + ' '.join(
+            ps_cmd = 'ps ax ' + ' '.join(
                     ['-o '+ o +'='+ widths[i]*'-' for i,o in enumerate(self.ps_fields)]
                 ) + ' -o args'
             err, ps_out = runcmd(ps_cmd)
             if err:
-                print('Error: executing ps -e -o ' + ",".join(self.ps_fields))
+                print('Error: executing ps ax -o ' + ",".join(self.ps_fields))
                 sys.exit(1)
             return ps_out.splitlines()
-        _, out = runcmd('ps -ef') # user pid ppid tty stime command
-        ps_out = []
+        _, out = runcmd('ps aux') # try to use header to guess columns
         out = out.splitlines()
+        if not 'PPID' in out[0]:
+            _, out = runcmd('ps -ef')
+            out = out.splitlines()
+        ps_out = []
         fields = {}
         for i,field in enumerate(out[0].strip().lower().split()):
             field = re.sub("command|cmd", "args", field)
             field = re.sub("uid", "user", field)
             fields[field] = i
+        if not 'ppid' in fields:
+            print("Error: command 'ps aux' does not provides PPID")
+            sys.exit(1)
         fields["ucomm"] = len(fields)
         for line in out:
             ps_info = line.strip().split(None, len(fields)-2)
@@ -267,6 +277,7 @@ class Proctree:
 
     def get_parents(self):
         """get parents list of pids"""
+        last_ppid = None
         for pid in self.pids:
             if pid not in self.ps_info:
                 continue
