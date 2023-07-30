@@ -18,14 +18,14 @@ The code must be compatible with python 2.x + 3.x
 Should work on any Unix that can execute :
 ```
 # /usr/bin/pgrep 
-# /usr/bin/ps -e -o pid,ppid,stime,user,ucomm,args
+# /usr/bin/ps ax -o pid,ppid,stime,user,ucomm,args
 ```
 
 if `pgrep` command not available (AIX), pgtree uses built-in pgrep (`-f -i -x -u <user>` supported).
 
-_Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse / MacOS / Solaris / AIX including old versions_
+_Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse / FreeBSD / ArchLinux / MacOS / Solaris / AIX including old versions_
 
-_(uses -o comm on Solaris)_
+_(uses -o fname on Solaris)_
 
 ## Installation
 FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
