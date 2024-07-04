@@ -179,3 +179,5 @@ class ProctreeTest(unittest.TestCase):
         except SystemExit:
             pass
 
+    def test_threads(self):
+        pgtree.main(["-T"])
