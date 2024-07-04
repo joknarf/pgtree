@@ -23,7 +23,9 @@ Should work on any Unix that can execute :
 
 if `pgrep` command not available (AIX), pgtree uses built-in pgrep (`-f -i -x -u <user>` supported).
 
-_Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse / FreeBSD / ArchLinux / MacOS / Solaris / AIX including old versions_
+`-T` option to display threads only works if `ps ax -T -o spid,ppid` available on system (ubuntu/redhat...)
+
+_pgtree Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse / FreeBSD / ArchLinux / MacOS / Solaris / AIX including old versions_
 
 _(uses -o fname on Solaris)_
 
@@ -34,14 +36,7 @@ installation using pip:
 ```
 # pip install pgtree
 ```
-installation using setup.py, root install in `/usr/local/bin`:
-```
-# ./setup.py install
-```
-installation using setup.py, user install in `~/.local/bin`:
-```
-# ./setup.py install --prefix=~/.local
-```
+
 ## Usage
 ```
 # pgtree -h
@@ -58,6 +53,7 @@ installation using setup.py, user install in `~/.local/bin`:
     -w : tty wrap text : y/yes or n/no (default y)
     -W : watch and follow process tree every 2s
     -a : use ascii characters
+    -T : display threads (ps -T)
     -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
 
