@@ -147,19 +147,16 @@ class Proctree:
         self.pids_tree = {}
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
-        self.threads = threads
         self.ps_fields = self.get_fields(opt_fields, use_uid, threads)
         self.get_psinfo(pid_zero)
 
     def get_fields(self, opt_fields=None, use_uid=False, threads=False):
         """ Get ps fields from OS / optionnal fields """
-        global PS_OPTION
         if use_uid:
             user = 'uid'
         else:
             user = 'user'
         if threads:
-            PS_OPTION += " -T"
             pid = 'spid'
         else:
             pid = 'pid'
@@ -447,6 +444,7 @@ def watch_pgtree(options, psfields, pgrep_args, sig):
 
 def main(argv):
     """pgtree command line"""
+    global PS_OPTION
     usage = """
     usage: pgtree.py [-W] [-RIya] [-C <when>] [-O <psfield>] [-c|-k|-K] [-1|-p <pid1>,...|<pgrep args>]
 
@@ -503,6 +501,8 @@ def main(argv):
             psfields = arg.split(',')
         elif opt == "-R":
             os.environ["PGT_PGREP"] = ""
+        elif opt == "-T":
+            PS_OPTION += " -T"
         elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
             pgrep_args.append(opt)
         elif opt in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
