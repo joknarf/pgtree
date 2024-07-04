@@ -138,7 +138,7 @@ class Proctree:
 
     # pylint: disable=R0913
     def __init__(self, use_uid=False, use_ascii=False, use_color=False,
-                 pid_zero=True, opt_fields=None):
+                 pid_zero=True, opt_fields=None, threads=False):
         """constructor"""
         self.pids = []
         self.ps_info = {}        # ps command info stored
@@ -147,20 +147,26 @@ class Proctree:
         self.pids_tree = {}
         self.top_parents = []
         self.treedisp = Treedisplay(use_ascii, use_color)
-        self.ps_fields = self.get_fields(opt_fields, use_uid)
+        self.threads = threads
+        self.ps_fields = self.get_fields(opt_fields, use_uid, threads)
         self.get_psinfo(pid_zero)
 
-    def get_fields(self, opt_fields=None, use_uid=False):
+    def get_fields(self, opt_fields=None, use_uid=False, threads=False):
         """ Get ps fields from OS / optionnal fields """
+        global PS_OPTION
         if use_uid:
             user = 'uid'
         else:
             user = 'user'
-
+        if threads:
+            PS_OPTION += " -T"
+            pid = 'spid'
+        else:
+            pid = 'pid'
         if not opt_fields or not os.environ.get('PGT_COMM'):
             opt_fields = [os.environ.get('PGT_STIME') or 'stime']
 
-        return ['pid', 'ppid', user, os.environ.get('PGT_COMM') or 'ucomm'] + opt_fields
+        return [pid, 'ppid', user, os.environ.get('PGT_COMM') or 'ucomm'] + opt_fields
 
     def run_ps(self, widths):
         """
@@ -412,7 +418,8 @@ def pgtree(options, psfields, pgrep_args):
                      use_ascii='-a' in options,
                      use_color=colored(options['-C']),
                      pid_zero='-1' not in options,
-                     opt_fields=psfields)
+                     opt_fields=psfields,
+                     threads='-T' in options)
 
     found = None
     if '-p' in options:
@@ -454,6 +461,7 @@ def main(argv):
     -w : tty wrap text : y/yes or n/no (default y)
     -W : watch and follow process tree every 2s
     -a : use ascii characters
+    -T : display threads (ps -T)
     -O <psfield>[,psfield,...] : display multiple <psfield> instead of 'stime' in output
                    <psfield> must be valid with ps -o <psfield> command
 
@@ -473,7 +481,7 @@ def main(argv):
         argv = os.environ["PGTREE"].split(' ') + argv
     try:
         opts, args = getopt.getopt(argv,
-                                   "W1IRckKfxvinoyap:u:U:g:G:P:s:t:F:O:C:w:",
+                                   "W1IRckKfxvinoyaTp:u:U:g:G:P:s:t:F:O:C:w:",
                                    ["ns=", "nslist="])
     except getopt.GetoptError:
         print(usage)
