@@ -6,6 +6,8 @@ from unittest.mock import patch
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import pgtree
 #from unittest.mock import MagicMock, Mock, patch
+os.environ['PGT_COMM'] = 'ucomm'
+os.environ['PGT_STIME'] = 'stime'
 
 class ProctreeTest(unittest.TestCase):
     """tests for pgtree"""
@@ -22,7 +24,7 @@ class ProctreeTest(unittest.TestCase):
         ps_out += f'{"30":>30} {"10":>30} {"joknarf":<30} {"top":<130} {"10:10":<50} /bin/top\n'
         ps_out += f'{"40":>30} {"1":>30} {"root":<30} {"bash":<130} {"11:01":<50} -bash'
         print(ps_out)
-        mock_runcmd.return_value = ps_out
+        mock_runcmd.return_value = 0, ps_out
         mock_kill.return_value = True
         ptree = pgtree.Proctree()
 
@@ -140,7 +142,7 @@ class ProctreeTest(unittest.TestCase):
     def test_main7(self):
         """test"""
         print('main7 ========')
-        pgtree.main(['-O', '%cpu', 'bash'])
+        pgtree.main(['-C', 'y', '-O', '%cpu', 'init'])
 
     def test_ospgrep(self):
         """pgrep os"""
@@ -165,6 +167,17 @@ class ProctreeTest(unittest.TestCase):
         mock_sleep.return_value = True
         pgtree.main(['-W', 'bash'])
 
+    @patch.dict(os.environ, {"PGT_COMM": "", "PGT_STIME": ""})
+    def test_simpleps(self):
+        pgtree.main([])
 
-if __name__ == "__main__":
-    unittest.main(failfast=True)
+    def test_psfail(self):
+        """test"""
+        print('psfail ========')
+        try:
+            pgtree.main(['-O abcd'])
+        except SystemExit:
+            pass
+
+    def test_threads(self):
+        pgtree.main(["-T"])
