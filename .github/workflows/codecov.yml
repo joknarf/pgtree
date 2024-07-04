@@ -15,4 +15,6 @@ jobs:
       - name: Run tests and collect coverage
         run: pytest --cov
       - name: Upload coverage to Codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         uses: codecov/codecov-action@v3
