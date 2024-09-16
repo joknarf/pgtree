@@ -1,0 +1,1 @@
+alias pgtree="${BASH_SOURCE%.plugin.bash}/pgtree"

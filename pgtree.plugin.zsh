@@ -1,0 +1,1 @@
+alias pgtree="${0%.plugin.zsh}/pgtree"
