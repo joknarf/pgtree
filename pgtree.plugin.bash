@@ -1,1 +1,1 @@
-alias pgtree="${BASH_SOURCE%.plugin.bash}/pgtree"
+alias pgtree="$(cd "${BASH_SOURCE%/*}";pwd)/pgtree/pgtree"
