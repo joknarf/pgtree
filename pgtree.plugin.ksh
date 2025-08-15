@@ -1,1 +1,1 @@
-alias pgtree="$(cd "${.sh.file%/*}";pwd)/pgtree/pgtree"
+alias pgtree="$(\cd "${.sh.file%/*}";pwd)/pgtree/pgtree"
