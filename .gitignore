@@ -6,3 +6,4 @@ __pycache__
 *.pyc
 .coverage
 coverage.xml
+pgtree/version.py

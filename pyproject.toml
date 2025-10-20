@@ -1,0 +1,52 @@
+[project]
+name = "pgtree"
+authors = [
+    { name = "Franck Jouvanceau" },
+]
+maintainers = [
+    { name = "Franck Jouvanceau" },
+]
+license = "MIT"
+description = "Unix process tree search"
+dependencies = [
+]
+dynamic=["version"]
+readme = "README.md"
+license-files = ["LICENSE"]
+requires-python = ">= 3.6"
+keywords = ["shell", "pstree", "pgrep", "process", "tree"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: System Administrators",
+  "Operating System :: POSIX",
+  "Operating System :: Unix",
+  "Operating System :: MacOS",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Clustering",
+  "Topic :: System :: Networking",
+  "Topic :: System :: Systems Administration",
+]
+
+[project.urls]
+Homepage = "https://github.com/joknarf/pgtree"
+Documentation = "https://github.com/joknarf/pgtree/blob/main/README.md"
+Repository = "https://github.com/joknarf/pgtree.git"
+
+[build-system]
+requires = ["setuptools >= 64.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_file = "pgtree/version.py"
+
+[tool.setuptools]
+script-files = ["pgtree/pgtree"]
