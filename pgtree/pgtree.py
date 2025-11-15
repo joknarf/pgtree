@@ -64,6 +64,13 @@ try:
     import time
 except ImportError:
     pass
+try:
+    from shlex import join as shlex_join
+except ImportError:
+    import pipes
+    def shlex_join(cmd_list):
+        """shlex.join for python2"""
+        return ' '.join([pipes.quote(c) for c in cmd_list])
 
 # impossible detection using ps for AIX/MacOS
 # stime is not start time of process
@@ -246,7 +253,7 @@ class Proctree:
         """mini built-in pgrep if pgrep command not available
            [-f] [-x] [-i] [-u <user>] [pattern]"""
         if "PGT_PGREP" not in os.environ or os.environ["PGT_PGREP"]:
-            _, pgrep = runcmd('pgrep ' +' '.join(argv))
+            _, pgrep = runcmd('pgrep ' + shlex_join(argv))
             return pgrep.split("\n")
 
         try:
@@ -268,7 +275,6 @@ class Proctree:
                 exact = True
             elif opt == "-u":
                 user = arg
-
         if args:
             pattern = args[0]
         if exact:
@@ -281,7 +287,6 @@ class Proctree:
                re.match(user, info["user"]):
                 pids.append(pid)
         return pids
-
 
     def get_parents(self):
         """get parents list of pids"""
@@ -353,6 +358,8 @@ class Proctree:
 
     def print_tree(self, pids=None, child_only=False, sig=0, confirmed=False):
         """display full or children only process tree"""
+        if pids == []:
+            return
         if pids:
             self.pids = pids
         else:
