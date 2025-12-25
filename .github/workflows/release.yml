@@ -121,6 +121,9 @@ jobs:
           else
             echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           fi
+          echo "TOOL=pgtree" >> $GITHUB_ENV
+          echo "TOOL_PATH=pgtree/pgtree.py" >>$GITHUB_ENV
+          echo "DESC=process tree search" >> $GITHUB_ENV
 
       - name: Build APK
         run: |
@@ -152,6 +155,9 @@ jobs:
           else
             echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           fi
+          echo "TOOL=pgtree" >> $GITHUB_ENV
+          echo "TOOL_PATH=pgtree/pgtree.py" >>$GITHUB_ENV
+          echo "DESC=process tree search" >> $GITHUB_ENV
 
       - name: Build PKG
         run: |
