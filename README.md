@@ -35,8 +35,8 @@ installation using pip:
 ```
 # pip install pgtree
 ```
-or
-Use your prefered method according to your OS:
+
+or use your prefered method according to your OS:
 
 ```
 brew install joknarf/tools/pgtree
