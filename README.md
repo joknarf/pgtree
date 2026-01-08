@@ -5,6 +5,7 @@
 [![Python versions](https://img.shields.io/badge/python-2.3+%20|%203.x-blue.svg?logo=python)](https://shields.io/)
 [![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](https://shields.io/)
 [![Downloads](https://pepy.tech/badge/pgtree)](https://pepy.tech/project/pgtree)
+[![Packages](https://img.shields.io/badge/Packages-%20rpm%20|%20deb%20|%20pkg%20|%20apk%20|%20brew%20-darkgreen.svg)](https://github.com/joknarf/pgtree/releases/latest)
 
 # pgtree
 Unix process hierachy tree display for specific processes (kind of mixed pgrep + pstree)
