@@ -16,7 +16,7 @@ Unix process hierachy tree display for specific processes (kind of mixed pgrep +
 * filter process tree using pgrep options / pattern
 * limit tree to processes and their children
 * customize ps fields to output
-* can send kill or kill -9 to processe and their children
+* can send kill or kill -9 to processes and their children
 * watch process tree 
 * supports all unix/linux/macos
 
