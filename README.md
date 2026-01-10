@@ -31,11 +31,10 @@ _(uses -o fname on Solaris)_
 
 ## Install
 FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
-You can use OS packages in release (rpm/deb/apk/pkg)
-or pip/brew:
+
+install using pip:
 ```
 # pip install pgtree
-# brew install joknarf/tools/pgtree
 ```
 
 or use your prefered method according to your OS:
