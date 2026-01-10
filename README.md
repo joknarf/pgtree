@@ -10,7 +10,7 @@
 # pgtree
 Unix process hierachy tree display for specific processes (kind of mixed pgrep + pstree)
 
-## features
+## Features
 
 * display process tree (parent + children)
 * filter process tree using pgrep options / pattern
