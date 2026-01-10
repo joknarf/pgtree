@@ -10,7 +10,15 @@
 # pgtree
 Unix process hierachy tree display for specific processes (kind of mixed pgrep + pstree)
 
-pgtree is also able to send signal to found processes and all their children
+## features
+
+* display process tree (parent + children)
+* filter process tree using pgrep options / pattern
+* limit tree to processes and their children
+* customize ps fields to output
+* can send kill or kill -9 to processe and their children
+* watch process tree 
+* supports all unix/linux/macos
 
 The purpose is to have the tool working out of the box on any Unix box, using the default OS python installed, without installing anything else.
 The code must be compatible with python 2.x + 3.x
@@ -28,6 +36,41 @@ if `pgrep` command not available (AIX), pgtree uses built-in pgrep (`-f -i -x -u
 _pgtree Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse / FreeBSD / ArchLinux / MacOS / Solaris / AIX including old versions_
 
 _(uses -o fname on Solaris)_
+
+## Examples
+show all parents and children of processes matching `bash`
+
+<img alt="# pgtree bash" src="https://user-images.githubusercontent.com/10117818/91555007-7d69a900-e930-11ea-98a2-8d81b7fdf0d3.png" width="850px">
+
+show processes matching `bash` and their children
+
+<img alt="# pgtree -c bash" src="https://user-images.githubusercontent.com/10117818/91555156-c15cae00-e930-11ea-9479-7c9b2c7b249e.png" width="850px">
+
+kill all `sh` processes of user joknarf and their children
+
+<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/91555424-48aa2180-e931-11ea-8f19-6054458aa79c.png" width="850px">
+
+Customize ps output fields:
+
+<img width="719" alt="image" src="https://user-images.githubusercontent.com/10117818/215278250-83440d9c-f1a1-4ac7-afa5-db4f1b1c6395.png">
+
+Put default options in PGTREE env variable:
+```
+# export PGTREE='-1 -O %cpu,stime -C y'
+# pgtree
+```
+
+Use watch utility to follow process tree:
+```
+# pgtree -W bash
+```
+![image](https://user-images.githubusercontent.com/10117818/215317322-7df4559c-ccf4-41f6-b008-55d1fc8f0bb7.png)
+
+## Demo
+
+![pgtree](https://github.com/user-attachments/assets/9e47439b-e212-48d0-9f5e-1347dbfe3bea)
+
+
 
 ## Install
 FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
@@ -90,36 +133,3 @@ sudo installer -pkg pgtree.pkg -target /
 
     found pids are prefixed with ▶
 ```
-## Examples
-show all parents and children of processes matching `bash`
-
-<img alt="# pgtree bash" src="https://user-images.githubusercontent.com/10117818/91555007-7d69a900-e930-11ea-98a2-8d81b7fdf0d3.png" width="850px">
-
-show processes matching `bash` and their children
-
-<img alt="# pgtree -c bash" src="https://user-images.githubusercontent.com/10117818/91555156-c15cae00-e930-11ea-9479-7c9b2c7b249e.png" width="850px">
-
-kill all `sh` processes of user joknarf and their children
-
-<img alt="#pgtree -k -u joknarf -x sh" src="https://user-images.githubusercontent.com/10117818/91555424-48aa2180-e931-11ea-8f19-6054458aa79c.png" width="850px">
-
-Customize ps output fields:
-
-<img width="719" alt="image" src="https://user-images.githubusercontent.com/10117818/215278250-83440d9c-f1a1-4ac7-afa5-db4f1b1c6395.png">
-
-Put default options in PGTREE env variable:
-```
-# export PGTREE='-1 -O %cpu,stime -C y'
-# pgtree
-```
-
-Use watch utility to follow process tree:
-```
-# pgtree -W bash
-```
-![image](https://user-images.githubusercontent.com/10117818/215317322-7df4559c-ccf4-41f6-b008-55d1fc8f0bb7.png)
-
-## Demo
-
-![pgtree](https://github.com/user-attachments/assets/9e47439b-e212-48d0-9f5e-1347dbfe3bea)
-
