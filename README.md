@@ -29,12 +29,13 @@ _pgtree Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse /
 
 _(uses -o fname on Solaris)_
 
-## Installation
+## Install
 FYI, the `pgtree/pgtree.py` is standalone and can be directly copied/used anywhere without any installation.
-
-installation using pip:
+You can use OS packages in release (rpm/deb/apk/pkg)
+or pip/brew:
 ```
 # pip install pgtree
+# brew install joknarf/tools/pgtree
 ```
 
 or use your prefered method according to your OS:
@@ -121,5 +122,5 @@ Use watch utility to follow process tree:
 
 ## Demo
 
-<img alt="output" src="https://user-images.githubusercontent.com/10117818/91558307-64fc8d00-e936-11ea-85bc-08eae29a58ce.gif" width="850px">
+![pgtree](https://github.com/user-attachments/assets/9e47439b-e212-48d0-9f5e-1347dbfe3bea)
 
