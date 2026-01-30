@@ -428,7 +428,7 @@ def pgtree(options, psfields, pgrep_args):
     found = None
     if '-p' in options:
         found = options['-p'].split(',')
-    elif pgrep_args:
+    elif pgrep_args and pgrep_args!=["-w"]:
         found = ptree.pgrep(pgrep_args)
     return (ptree, found)
 
@@ -510,6 +510,7 @@ def main(argv):
             os.environ["PGT_PGREP"] = ""
         elif opt == "-T":
             PS_OPTION += " -T"
+            pgrep_args.append("-w")
         elif opt in ("-f", "-x", "-v", "-i", "-n", "-o"):
             pgrep_args.append(opt)
         elif opt in ("-u", "-U", "-g", "-G", "-P", "-s", "-t", "-F", "--ns", "--nslist"):
