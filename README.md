@@ -31,7 +31,7 @@ Should work on any Unix that can execute :
 
 if `pgrep` command not available (AIX), pgtree uses built-in pgrep (`-f -i -x -u <user>` supported).
 
-`-T` option to display threads only works if `ps ax -T -o spid,ppid` available on system (ubuntu/redhat...)
+`-T` option to display threads only works if `ps ax -T -o spid,ppid` / `pgrep -w` available on system (ubuntu/redhat...)
 
 _pgtree Tested on various versions of RedHat / CentOS / Ubuntu / Debian / Suse / FreeBSD / ArchLinux / MacOS / Solaris / AIX including old versions_
 
