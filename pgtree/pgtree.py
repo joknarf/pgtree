@@ -427,7 +427,11 @@ def pgtree(options, psfields, pgrep_args):
 
     found = None
     if '-p' in options:
-        found = options['-p'].split(',')
+        if "-w" in pgrep_args:
+            err, out = runcmd("ps -T -o spid= -p "+options['-p'])
+            found = out.replace(' ','').splitlines()
+        else:
+            found = options['-p'].split(',')
     elif pgrep_args and pgrep_args!=["-w"]:
         found = ptree.pgrep(pgrep_args)
     return (ptree, found)
