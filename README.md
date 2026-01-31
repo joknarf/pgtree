@@ -12,8 +12,8 @@ Unix process hierachy tree display for specific processes (kind of mixed pgrep +
 
 ## Features
 
-* display process tree (parent + children)
-* filter process tree using pgrep options / pattern
+* display process tree (parent + children) and optionnally threads
+* filter process/threads tree using pgrep options / pattern
 * limit tree to processes and their children
 * customize ps fields to output
 * can send kill or kill -9 to processes and their children
