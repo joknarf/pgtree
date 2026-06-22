@@ -8,8 +8,8 @@
 [![Packages](https://img.shields.io/badge/Packages-%20rpm%20|%20deb%20|%20pkg%20|%20apk%20|%20brew%20-darkgreen.svg)](https://github.com/joknarf/pgtree/releases/latest)
 
 # pgtree
-Unix process hierachy tree display for specific processes (kind of mixed pgrep + pstree)
-You can now take a look at [joknarf/pgtreeawk](https://github.com/joknarf/pgtreeawk), a pgtree implementation using bash/awk (more portable, no python needed)
+Unix process hierachy tree display for specific processes (kind of mixed pgrep + pstree)  
+You can now take a look at [joknarf/pgtreeawk](https://github.com/joknarf/pgtreeawk), a pgtree implementation using bash/awk (more portable, no python needed)  
 And also a pure bash implementation (but a little slower) [joknarf/pgt](https://github.com/joknarf/pgt)
 
 ## Features
