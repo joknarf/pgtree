@@ -9,6 +9,8 @@
 
 # pgtree
 Unix process hierachy tree display for specific processes (kind of mixed pgrep + pstree)
+You can now take a look at [joknarf/pgtreeawk](https://github.com/joknarf/pgtreeawk), a pgtree implementation using bash/awk (more portable, no python needed)
+And also a pure bash implementation (but a little slower) [joknarf/pgt](https://github.com/joknarf/pgt)
 
 ## Features
 
