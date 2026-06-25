@@ -15,7 +15,7 @@ ps -p $$ -o ucomm >/dev/null 2>&1 && PGT_COMM=ucomm
     [ ! "$PGT_STIME" ] && PGT_STIME=time
 }
 # busybox no -p option
-[ ! "$PGT_COMM" ] && ! ps -p $$ >/dev/null 2>&1 && PGT_COMM=comm && PGT_STIME=time
+[ ! "$PGT_COMM" ] && ! ps -p $$ >/dev/null 2>&1 && PGT_COMM=comm && PGT_STIME=etime
 export PGT_COMM PGT_STIME PGT_PGREP
 read python <<<"$(type -p python3 python python2)"
 [ "$python" ] && exec $python "$0" "$@"
