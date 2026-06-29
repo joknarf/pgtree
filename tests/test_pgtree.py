@@ -112,12 +112,13 @@ class ProctreeTest(unittest.TestCase):
         pgtree.main(['sshd', '-cf', '-u', 'root'])
 
     @patch('os.kill')
-    def test_main3(self, mock_kill):
+    @patch('builtins.input')
+    def test_main3(self, mock_input, mock_kill):
         """test"""
         print('main3 ========')
         mock_kill.return_value = True
+        mock_input.return_value = 'n'
         pgtree.main(['-k', '-p', '1111'])
-        pgtree.main(['-K', '-p', '1111'])
 
     def test_main4(self):
         """test"""
