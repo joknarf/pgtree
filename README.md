@@ -94,17 +94,17 @@ sudo dnf install https://github.com/joknarf/pgtree/releases/latest/download/pypg
 
 ```
 curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pypgtree.deb
-sudo dpkg -i pgtree.deb
+sudo dpkg -i pypgtree.deb
 ```
 
 ```
 curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pypgtree.apk
-sudo apk add --allow-untrusted pgtree.apk
+sudo apk add --allow-untrusted pypgtree.apk
 ```
 
 ```
 curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pypgtree.pkg
-sudo installer -pkg pgtree.pkg -target /
+sudo installer -pkg pypgtree.pkg -target /
 ```
 
 ## Usage
