@@ -85,25 +85,25 @@ install using pip:
 or use your prefered method according to your OS:
 
 ```
-brew install joknarf/tools/pgtree
+brew install joknarf/tools/pypgtree
 ```
 
 ```
-sudo dnf install https://github.com/joknarf/pgtree/releases/latest/download/pgtree.rpm
+sudo dnf install https://github.com/joknarf/pgtree/releases/latest/download/pypgtree.rpm
 ```
 
 ```
-curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pgtree.deb
+curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pypgtree.deb
 sudo dpkg -i pgtree.deb
 ```
 
 ```
-curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pgtree.apk
+curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pypgtree.apk
 sudo apk add --allow-untrusted pgtree.apk
 ```
 
 ```
-curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pgtree.pkg
+curl -OL https://github.com/joknarf/pgtree/releases/latest/download/pypgtree.pkg
 sudo installer -pkg pgtree.pkg -target /
 ```
 
