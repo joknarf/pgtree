@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 env:
-  TOOL: ${{ github.event.repository.name }}
+  TOOL: pypgtree
   TOOL_PATH: ${{ github.event.repository.name }}/pgtree.py
   DESC: process tree search
   VERSION: ${{ github.event.release.tag_name }}
